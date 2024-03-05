@@ -1,13 +1,13 @@
 from rest_framework import status, viewsets
 from rest_framework.response import Response
 
-from api.serializers import UserSerializer
+from api.serializers import UserSerializerAuth
 from custom_user.models import CustomUser
 
 
-class UserViewSet(viewsets.ModelViewSet):
+class UserViewSetAuth(viewsets.ModelViewSet):
     queryset = CustomUser.objects.all()
-    serializer_class = UserSerializer
+    serializer_class = UserSerializerAuth
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
