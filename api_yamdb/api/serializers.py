@@ -24,6 +24,7 @@ class UserSerializerAuth(BaseUserSerializer):
 
 class UserSerializerAdmin(BaseUserSerializer):
     class Meta:
+        model = CustomUser
         fields = (
             'username',
             'email',
@@ -32,8 +33,3 @@ class UserSerializerAdmin(BaseUserSerializer):
             'bio',
             'role',
         )
-
-    def validate_username(self, value):
-        if value == 'me':
-            raise BadRequest('Username cannot be "me"')
-        return value

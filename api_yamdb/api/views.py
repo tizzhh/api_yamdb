@@ -5,7 +5,7 @@ from django.core.mail import send_mail
 from rest_framework import status, viewsets
 from rest_framework.response import Response
 
-from api.serializers import UserSerializerAuth
+from api.serializers import UserSerializerAuth, UserSerializerAdmin
 from custom_user.models import CustomUser
 
 
@@ -33,8 +33,13 @@ class UserViewSetAuth(viewsets.ModelViewSet):
     def send_confirmation_code_email(self, data):
         send_mail(
             subject='Confirmation code',
-            message=f'Dear {data.get("username")}, here\'s your confirmation code: {randint(1000, 9999)}',
+            message=f'Dear {data.get("username")}, here\'s your confirmation code: {randint(10000, 99999)}',
             from_email='yamdb@yamdb.net',
             recipient_list=(data.get('email'),),
             fail_silently=True,
         )
+
+
+class UserViewSetAdmin(viewsets.ModelViewSet):
+    queryset = CustomUser.objects.all()
+    serializer_class = UserSerializerAdmin
