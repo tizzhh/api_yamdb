@@ -8,6 +8,7 @@ urlpatterns = [
         views.UserViewSetAuth.as_view({'post': 'create'}),
         name='signup',
     ),
+    path('auth/token/', views.get_custom_token, name='jwt-token'),
     path(
         'users/',
         views.UserViewSetAdmin.as_view(
