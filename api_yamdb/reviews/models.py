@@ -9,23 +9,21 @@ User = get_user_model()
 
 
 class Title(models.Model):
-    name = models.CharField('Наименование', max_length=50)
+    name = models.CharField('Наименование', max_length=256)
     year = models.IntegerField('Год публикации')
     rating = ...  # Здесь нужно привязать рейтинг видимо с Review моделями...
     description = models.TextField('Описание', blank=True)
-    category = models.ForeignKey('Category', on_delete=models.CASCADE,
-                                 verbose_name='Категория',
-                                 related_name='category')
-    genre = models.ManyToManyField('Genre', through='Genre_Title',
-                                   verbose_name='Жанры',
-                                   related_name='genre')
+    category = models.ForeignKey('Category', on_delete=models.SET_NULL,
+                                 verbose_name='Категория', null=True)
+    genre = models.ManyToManyField('Genre', verbose_name='Жанры')
 
     class Meta:
+        default_related_name = 'titles'
         ordering = ['name', 'year', 'category']
 
         constraints = [
             CheckConstraint(
-                check=Q(year__gt=dt.datetime.now().year()),
+                check=Q(year__lte=dt.datetime.now().year),
                 name='Год выпуска не может быть больше текущего'
             )
         ]
@@ -35,8 +33,8 @@ class Title(models.Model):
 
 
 class Category(models.Model):
-    name = models.CharField('Наименование', max_length=50)
-    slug = models.SlugField('Слаг', unique=True)
+    name = models.CharField('Наименование', max_length=256)
+    slug = models.SlugField('Слаг', unique=True, max_length=50)
 
     class Meta:
         ordering = ['name']
@@ -46,21 +44,11 @@ class Category(models.Model):
 
 
 class Genre(models.Model):
-    name = models.CharField('Наименование', max_length=50)
-    slug = models.SlugField('Слаг', unique=True)
+    name = models.CharField('Наименование', max_length=256)
+    slug = models.SlugField('Слаг', unique=True, max_length=50)
 
     class Meta:
         ordering = ['name']
 
     def __str__(self):
         return self.name
-
-
-class Genre_Title(models.Model):
-    title = models.ForeignKey(Title, on_delete=models.CASCADE,
-                              verbose_name='Произведение')
-    genre = models.ForeignKey(Genre, on_delete=models.CASCADE,
-                              verbose_name='Жанр')
-
-    class Meta:
-        ordering = ['title', 'genre']
