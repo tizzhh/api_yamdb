@@ -7,11 +7,13 @@ from rest_framework.decorators import api_view
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework_simplejwt.views import TokenObtainPairView
 
 from .permissions import IsAdmin
-from api.serializers import (CustomTokenObtainPairSerializer,
-                             UserSerializerAdmin, UserSerializerAuth)
+from api.serializers import (
+    CustomTokenObtainPairSerializer,
+    UserSerializerAdmin,
+    UserSerializerAuth,
+)
 from custom_user.models import CustomUser
 
 
