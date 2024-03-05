@@ -20,6 +20,16 @@ urlpatterns = [
         name='users-admin',
     ),
     path(
+        'users/me/',
+        views.UserViewSetReadPatch.as_view(
+            {
+                'get': 'retrieve',
+                'patch': 'partial_update',
+            }
+        ),
+        name='users-me',
+    ),
+    path(
         'users/<slug:username>/',
         views.UserViewSetAdmin.as_view(
             {

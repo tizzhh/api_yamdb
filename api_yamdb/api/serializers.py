@@ -52,3 +52,17 @@ class UserSerializerAdmin(BaseUserSerializer):
             'bio',
             'role',
         )
+
+
+class UserSerializerReadPatch(BaseUserSerializer):
+    class Meta:
+        model = CustomUser
+        fields = (
+            'username',
+            'email',
+            'first_name',
+            'last_name',
+            'bio',
+            'role',
+        )
+        read_only_fields = ('role',)

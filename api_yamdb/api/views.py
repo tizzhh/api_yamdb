@@ -2,17 +2,19 @@ from random import randint
 
 from django.core.exceptions import BadRequest
 from django.core.mail import send_mail
+from django.shortcuts import get_object_or_404
 from rest_framework import filters, status, viewsets
 from rest_framework.decorators import api_view
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from .permissions import IsAdmin
+from .permissions import IsAdminOrSuperUser, IsAnyAuth
 from api.serializers import (
     CustomTokenObtainPairSerializer,
     UserSerializerAdmin,
     UserSerializerAuth,
+    UserSerializerReadPatch,
 )
 from custom_user.models import CustomUser
 
@@ -73,8 +75,16 @@ class UserViewSetAuth(viewsets.ModelViewSet):
 class UserViewSetAdmin(viewsets.ModelViewSet):
     queryset = CustomUser.objects.all()
     serializer_class = UserSerializerAdmin
-    permission_classes = (IsAdmin,)
+    permission_classes = (IsAdminOrSuperUser,)
     lookup_field = 'username'
     filter_backends = (filters.SearchFilter,)
     search_fields = ('username',)
     pagination_class = PageNumberPagination
+
+
+class UserViewSetReadPatch(viewsets.ModelViewSet):
+    serializer_class = UserSerializerReadPatch
+    permission_classes = (IsAnyAuth,)
+
+    def get_object(self):
+        return get_object_or_404(CustomUser, username=self.request.user)
