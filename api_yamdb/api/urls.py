@@ -13,8 +13,17 @@ urlpatterns = [
         'users/',
         views.UserViewSetAdmin.as_view(
             {
-                'get': 'retrieve',
+                'get': 'list',
                 'post': 'create',
+            }
+        ),
+        name='users-admin',
+    ),
+    path(
+        'users/<slug:username>/',
+        views.UserViewSetAdmin.as_view(
+            {
+                'get': 'retrieve',
                 'patch': 'partial_update',
                 'delete': 'destroy',
             }

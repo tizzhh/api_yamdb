@@ -9,7 +9,6 @@ class CustomUser(AbstractUser):
         moderator = 'moderator'
         admin = 'admin'
 
-    password = None
     confirmation_code = models.PositiveIntegerField(blank=True, null=True)
     email = models.EmailField(unique=True, max_length=254)
     bio = models.TextField('Биография', blank=True)
@@ -23,6 +22,7 @@ class CustomUser(AbstractUser):
                 check=~Q(username='me'), name='username_me_banned_word'
             )
         ]
+        ordering = ('id',)
 
     def __str__(self) -> str:
         return self.username

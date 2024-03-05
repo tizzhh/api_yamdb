@@ -1,13 +1,17 @@
 from django.core.exceptions import BadRequest
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 from custom_user.models import CustomUser
 
 
-class CustomTokenObtainPairSerializer(serializers.Serializer):
-    username = serializers.CharField()
-    confirmation_code = serializers.IntegerField()
+class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        del self.fields['password']
+        self.fields['username'] = serializers.CharField()
+        self.fields['confirmation_code'] = serializers.IntegerField()
 
     def validate(self, attrs):
         username = attrs['username']
@@ -15,6 +19,7 @@ class CustomTokenObtainPairSerializer(serializers.Serializer):
         user = get_object_or_404(CustomUser, username=username)
         if confirmation_code != user.confirmation_code:
             raise BadRequest('Incorrect confirmation code')
+        attrs['USER'] = user
         return attrs
 
 

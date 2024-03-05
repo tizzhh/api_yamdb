@@ -2,16 +2,16 @@ from random import randint
 
 from django.core.exceptions import BadRequest
 from django.core.mail import send_mail
-from rest_framework import status, viewsets
+from rest_framework import filters, status, viewsets
 from rest_framework.decorators import api_view
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.views import TokenObtainPairView
 
-from api.serializers import (
-    CustomTokenObtainPairSerializer,
-    UserSerializerAdmin,
-    UserSerializerAuth,
-)
+from .permissions import IsAdmin
+from api.serializers import (CustomTokenObtainPairSerializer,
+                             UserSerializerAdmin, UserSerializerAuth)
 from custom_user.models import CustomUser
 
 
@@ -19,7 +19,8 @@ from custom_user.models import CustomUser
 def get_custom_token(request):
     serializer = CustomTokenObtainPairSerializer(data=request.data)
     if serializer.is_valid():
-        refresh = RefreshToken.for_user(request.user)
+        print(serializer.validated_data)
+        refresh = RefreshToken.for_user(serializer.validated_data['USER'])
         return Response(
             {
                 'refresh': str(refresh),
@@ -70,3 +71,8 @@ class UserViewSetAuth(viewsets.ModelViewSet):
 class UserViewSetAdmin(viewsets.ModelViewSet):
     queryset = CustomUser.objects.all()
     serializer_class = UserSerializerAdmin
+    permission_classes = (IsAdmin,)
+    lookup_field = 'username'
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('username',)
+    pagination_class = PageNumberPagination
