@@ -1,4 +1,3 @@
-from django.forms import ValidationError
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 
@@ -24,7 +23,15 @@ class ReviewSerializer(serializers.ModelSerializer):
         if request.method == 'POST' and Review.objects.filter(
                 author=request.user, title=title
         ).exists():
-            raise ValidationError(
+            raise serializers.ValidationError(
                 'Можно оставить только один отзыв к произведению.'
             )
         return data
+
+    def validate_score(self, value):
+        """Checks validity of rating value."""
+        if 1 > value > 10:
+            raise serializers.ValidationError(
+                'Допустимые значения оценки: от 1 до 10.'
+            )
+        return value
