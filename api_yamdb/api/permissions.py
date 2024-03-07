@@ -11,12 +11,11 @@ class IsAdminOrSuperUser(permissions.IsAuthenticated):
         )
 
 
-class IsAnyAuth(permissions.IsAuthenticated):
-    def has_permission(self, request, view):
-        return request.user.is_authenticated and (
-            any(
-                request.user.role == role[0]
-                for role in CustomUser.Roles.choices
-            )
-            or request.user.is_superuser
+class IsAdminModerOrAuthor(permissions.IsAuthenticated):
+    def has_object_permission(self, request, view, obj):
+        return (
+            request.user.is_superuser
+            or request.user.role == CustomUser.Roles.admin
+            or request.user.role == CustomUser.Roles.moderator
+            or request.user == obj.author
         )
