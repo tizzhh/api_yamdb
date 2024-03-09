@@ -1,6 +1,8 @@
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
+from custom_user.models import CustomUser
+
 
 class Review(models.Model):
     """Model describes parameters of review on title."""
@@ -12,7 +14,7 @@ class Review(models.Model):
         verbose_name='Произведение',
     )
     author = models.ForeignKey(
-        User,
+        CustomUser,
         on_delete=models.CASCADE,
         verbose_name='Пользователь',
     )
@@ -39,6 +41,35 @@ class Review(models.Model):
         ]
         verbose_name = 'Отзыв'
         verbose_name_plural = 'Отзывы'
+        ordering = ('-pub_date',)
+
+    def __str__(self):
+        return self.text[:]
+
+
+class Comment(models.Model):
+    """Model describes objects of comments to review."""
+
+    text = models.TextField('Текст комментария')
+    author = models.ForeigKey(
+        CustomUser,
+        on_delete=models.CASCADE,
+        verbose_name='Пользователь'
+    )
+    pub_date = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name='Дата публикации комментария'
+    )
+    review = models.ForeignKey(
+        Review,
+        on_delete=models.CASCADE,
+        verbose_name='Отзыв'
+    )
+
+    class Meta:
+        default_related_name = 'comments'
+        verbose_name = 'Комментарий'
+        verbose_name_plural = 'Комментарии'
         ordering = ('-pub_date',)
 
     def __str__(self):
