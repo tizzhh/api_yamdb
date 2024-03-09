@@ -11,10 +11,11 @@ class IsAdminOrSuperUser(permissions.BasePermission):
         )
 
 
-class IsAdminModerOrAuthor(permissions.IsAuthenticated):
+class IsAdminModerOrAuthorOrPostNew(permissions.IsAuthenticatedOrReadOnly):
     def has_object_permission(self, request, view, obj):
         return (
-            request.user.is_superuser
+            view.action == 'create'
+            or request.user.is_superuser
             or request.user.role == CustomUser.Roles.admin
             or request.user.role == CustomUser.Roles.moderator
             or request.user == obj.author
