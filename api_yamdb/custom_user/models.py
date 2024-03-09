@@ -9,9 +9,11 @@ class CustomUser(AbstractUser):
         moderator = 'moderator'
         admin = 'admin'
 
-    confirmation_code = models.PositiveIntegerField(blank=True, null=True)
-    email = models.EmailField(unique=True, max_length=254)
-    bio = models.TextField('Биография', blank=True)
+    confirmation_code = models.CharField(max_length=5, null=True, blank=True)
+    email = models.EmailField(
+        unique=True, max_length=254, null=False, blank=False
+    )
+    bio = models.TextField('Биография', null=True, blank=True)
     role = models.CharField(
         'Роль', choices=Roles.choices, max_length=9, default=Roles.user
     )

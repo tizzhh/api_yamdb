@@ -1,3 +1,4 @@
+from django import forms
 from django.core.exceptions import BadRequest
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
@@ -11,7 +12,7 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         super().__init__(*args, **kwargs)
         del self.fields['password']
         self.fields['username'] = serializers.CharField()
-        self.fields['confirmation_code'] = serializers.IntegerField()
+        self.fields['confirmation_code'] = serializers.CharField()
 
     def validate(self, attrs):
         username = attrs['username']
@@ -33,7 +34,7 @@ class BaseUserSerializer(serializers.ModelSerializer):
 
     def validate_username(self, value):
         if value == 'me':
-            raise BadRequest('Username cannot be "me"')
+            raise forms.ValidationError('Username cannot be "me"')
         return value
 
 

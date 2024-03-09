@@ -4,13 +4,13 @@ from api import views
 
 urlpatterns = [
     path(
-        'auth/signup/',
+        'v1/auth/signup/',
         views.UserViewSetAuth.as_view({'post': 'create'}),
         name='signup',
     ),
-    path('auth/token/', views.get_custom_token, name='jwt-token'),
+    path('v1/auth/token/', views.get_custom_token, name='jwt-token'),
     path(
-        'users/',
+        'v1/users/',
         views.UserViewSetAdmin.as_view(
             {
                 'get': 'list',
@@ -20,7 +20,7 @@ urlpatterns = [
         name='users-admin',
     ),
     path(
-        'users/me/',
+        'v1/users/me/',
         views.UserViewSetReadPatch.as_view(
             {
                 'get': 'retrieve',
@@ -30,7 +30,7 @@ urlpatterns = [
         name='users-me',
     ),
     path(
-        'users/<slug:username>/',
+        'v1/users/<slug:username>/',
         views.UserViewSetAdmin.as_view(
             {
                 'get': 'retrieve',

@@ -3,7 +3,7 @@ from rest_framework import permissions
 from custom_user.models import CustomUser
 
 
-class IsAdminOrSuperUser(permissions.IsAuthenticated):
+class IsAdminOrSuperUser(permissions.BasePermission):
     def has_permission(self, request, view):
         return request.user.is_superuser or (
             request.user.is_authenticated
