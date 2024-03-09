@@ -5,7 +5,7 @@ from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 from custom_user.models import CustomUser
-from reviews.models import Review, Title
+from reviews.models import Comment, Review, Title
 
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
@@ -104,3 +104,15 @@ class ReviewSerializer(serializers.ModelSerializer):
                 'Допустимые значения оценки: от 1 до 10.'
             )
         return value
+
+
+class CommentSerializer(serializers.ModelSerializer):
+    author = serializers.SlugRelatedField(
+        slug_field='username',
+        read_only=True,
+        default=serializers.CurrentUserDefault(),
+    )
+
+    class Meta:
+        model = Comment
+        fields = ('id', 'text', 'author', 'pub_date')

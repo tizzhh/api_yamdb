@@ -6,12 +6,13 @@ from django.shortcuts import get_object_or_404
 from rest_framework import filters, status, viewsets
 from rest_framework.decorators import api_view
 from rest_framework.pagination import PageNumberPagination
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from .permissions import IsAdminOrSuperUser
-from api.serializers import (
+from .permissions import IsAdminModerOrAuthorOrPostNew, IsAdminOrSuperUser
+from .serializers import (
+    CommentSerializer
     CustomTokenObtainPairSerializer,
     ReviewSerializer,
     UserSerializerAdmin,
@@ -19,7 +20,7 @@ from api.serializers import (
     UserSerializerReadPatch,
 )
 from custom_user.models import CustomUser
-from reviews.models import Title
+from reviews.models import Review, Title
 
 
 @api_view(['POST'])
@@ -95,7 +96,7 @@ class UserViewSetReadPatch(viewsets.ModelViewSet):
 
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
-    permission_classes = None
+    permission_classes = IsAuthenticatedOrReadOnly, IsAdminModerOrAuthorOrPostNew
 
     def get_title(self):
         return get_object_or_404(Title, pk=self.kwargs['title_id'])
@@ -107,3 +108,21 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         return self.get_title().reviews.all()
+
+
+class CommentViewSet(viewsets.ModelViewSet):
+    serializer_class = CommentSerializer
+    permission_classes = IsAuthenticatedOrReadOnly, IsAdminModerOrAuthorOrPostNew
+    
+
+    def get_review(self):
+        return get_object_or_404(Review, pk=self.kwargs['review_id'])
+
+    def perform_create(self, serializer):
+        return serializer.save(
+            author=self.request.user,
+            review=self.get_review()
+        )
+
+    def get_queryset(self):
+        return self.get_review().comments.all()
