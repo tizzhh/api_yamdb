@@ -5,7 +5,6 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.db.models import CheckConstraint, Q
 
-
 User = get_user_model()
 
 
@@ -14,8 +13,12 @@ class Title(models.Model):
     year = models.IntegerField('Год публикации')
     rating = ...  # Здесь нужно привязать рейтинг видимо с Review моделями...
     description = models.TextField('Описание', blank=True)
-    category = models.ForeignKey('Category', on_delete=models.SET_NULL,
-                                 verbose_name='Категория', null=True)
+    category = models.ForeignKey(
+        'Category',
+        on_delete=models.SET_NULL,
+        verbose_name='Категория',
+        null=True,
+    )
     genre = models.ManyToManyField('Genre', verbose_name='Жанры')
 
     class Meta:
@@ -25,7 +28,7 @@ class Title(models.Model):
         constraints = [
             CheckConstraint(
                 check=Q(year__lte=dt.datetime.now().year),
-                name='Год выпуска не может быть больше текущего'
+                name='Год выпуска не может быть больше текущего',
             )
         ]
 
@@ -50,7 +53,7 @@ class Genre(models.Model):
 
     class Meta:
         ordering = ['name']
-        
+
     def __str__(self):
         return self.name
 
@@ -73,21 +76,19 @@ class Review(models.Model):
         default=1,
         validators=[
             MinValueValidator(1, 'Оценка не может быть ниже 1.'),
-            MaxValueValidator(10, 'Оценка не может быть выше 10.')
+            MaxValueValidator(10, 'Оценка не может быть выше 10.'),
         ],
-        verbose_name='Оценка'
+        verbose_name='Оценка',
     )
     pub_date = models.DateTimeField(
-        auto_now_add=True,
-        verbose_name='Дата публикации отзыва'
+        auto_now_add=True, verbose_name='Дата публикации отзыва'
     )
 
     class Meta:
         default_related_name = 'reviews'
         constraints = [
             models.UniqueConstraint(
-                fields=['author', 'title'],
-                name='unique_author_title'
+                fields=['author', 'title'], name='unique_author_title'
             )
         ]
         verbose_name = 'Отзыв'
