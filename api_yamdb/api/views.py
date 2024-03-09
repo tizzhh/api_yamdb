@@ -13,11 +13,13 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from .permissions import IsAdminOrSuperUser
 from api.serializers import (
     CustomTokenObtainPairSerializer,
+    ReviewSerializer,
     UserSerializerAdmin,
     UserSerializerAuth,
     UserSerializerReadPatch,
 )
 from custom_user.models import CustomUser
+from reviews.models import Title
 
 
 @api_view(['POST'])
@@ -89,3 +91,19 @@ class UserViewSetReadPatch(viewsets.ModelViewSet):
 
     def get_object(self):
         return get_object_or_404(CustomUser, username=self.request.user)
+
+
+class ReviewViewSet(viewsets.ModelViewSet):
+    serializer_class = ReviewSerializer
+    permission_classes = None
+
+    def get_title(self):
+        return get_object_or_404(Title, pk=self.kwargs['title_id'])
+
+    def perform_create(self, serializer):
+        return serializer.save(
+            author=self.request.user, title=self.get_title()
+        )
+
+    def get_queryset(self):
+        return self.get_title().reviews.all()

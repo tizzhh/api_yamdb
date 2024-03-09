@@ -1,6 +1,14 @@
-from django.urls import path
+from django.urls import include, path
+from rest_framework.routers import DefaultRouter
 
 from api import views
+
+router = DefaultRouter()
+router.register(
+    r'titles/(?P<title_id>\d+)/reviews',
+    views.ReviewViewSet,
+    basename='reviews',
+)
 
 urlpatterns = [
     path(
@@ -40,4 +48,5 @@ urlpatterns = [
         ),
         name='users-admin',
     ),
+    path('v1/', include(router.urls)),
 ]
