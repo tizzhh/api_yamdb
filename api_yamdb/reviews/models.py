@@ -11,7 +11,6 @@ User = get_user_model()
 class Title(models.Model):
     name = models.CharField('Наименование', max_length=256)
     year = models.IntegerField('Год публикации')
-    rating = ...  # Здесь нужно привязать рейтинг видимо с Review моделями...
     description = models.TextField('Описание', blank=True)
     category = models.ForeignKey('Category', on_delete=models.SET_NULL,
                                  verbose_name='Категория', null=True)
