@@ -200,21 +200,9 @@ class TitleViewSet(viewsets.ModelViewSet):
     permission_classes = (
         IsAdminOrSuperUser | DjangoModelPermissionsOrAnonReadOnly,
     )
-<<<<<<< HEAD
     # filter_backends = (DjangoFilterBackend,)
     # filterset_fields = ('category', 'genre', 'name', 'year') не работает, мб
     # сделать через filters.Filter кастомный создать в общем
-=======
-    filter_backends = (
-        DjangoFilterBackend,
-        filters.SearchFilter,
-    )
-    search_fields = (
-        'name',
-        'year',
-    )
-    filterset_fields = ('year', 'name')
->>>>>>> ab809f77df9bc800cca307987d6d52df8ebbc8fd
     http_method_names = ['get', 'post', 'patch', 'delete']
 
     def get_queryset(self):

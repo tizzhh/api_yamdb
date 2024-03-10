@@ -1,0 +1,239 @@
+[33mcommit ebc011a8a64f0da6c6b758f5b8ea9a668c7e39e0[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mfeature/title_category_genre[m[33m, [m[1;31morigin/feature/title_category_genre[m[33m)[m
+Author: Диана Кужамбетова <dkuzhambetova@yandex.ru>
+Date:   Sun Mar 10 16:00:21 2024 +0300
+
+    Add rating field in Title serializer.
+
+[33mcommit a32fb826fe49aa11d2028da6cc76d73e7ce82610[m
+Author: Vadim Kuznetsov <darovadraste@gmail.com>
+Date:   Sun Mar 10 15:42:10 2024 +0300
+
+    fix permission
+
+[33mcommit 3d8a41894abdc545ec66c5fbc101ba4b88293088[m
+Author: bpaverin <bpaverin@gmail.com>
+Date:   Sun Mar 10 15:20:29 2024 +0300
+
+    3 tests
+
+[33mcommit 3bdfe5aee06e3b38342a5de0144dba733e5e725e[m
+Merge: 60915ce 2592d12
+Author: bpaverin <bpaverin@gmail.com>
+Date:   Sun Mar 10 14:54:07 2024 +0300
+
+    9 test left
+
+[33mcommit 60915cedb21095a6ecedb4ae50f59d1b30385772[m
+Author: bpaverin <bpaverin@gmail.com>
+Date:   Sun Mar 10 14:48:48 2024 +0300
+
+    before Diana's merge
+
+[33mcommit 2592d12d2b109a307c4b38c3d1769e91b6dce99d[m
+Author: Диана Кужамбетова <dkuzhambetova@yandex.ru>
+Date:   Sun Mar 10 14:46:47 2024 +0300
+
+    Add rating field in Title viewset.
+
+[33mcommit c54a7fe1a6751673d26757b626e2dc0f12e9c284[m
+Merge: 991aecd 259eefe
+Author: bpaverin <bpaverin@gmail.com>
+Date:   Sun Mar 10 14:03:15 2024 +0300
+
+    before 3rd merge
+
+[33mcommit 991aecda1aa0864ac7d556410b643a7584625fca[m
+Author: bpaverin <bpaverin@gmail.com>
+Date:   Sun Mar 10 14:02:14 2024 +0300
+
+    before 3rd merge
+
+[33mcommit 259eefea3057c441a54eb4fb36a4559b0c55cef5[m
+Author: Vadim Kuznetsov <darovadraste@gmail.com>
+Date:   Sun Mar 10 14:01:14 2024 +0300
+
+    Rever user changes, fix permissions on genre and category
+
+[33mcommit a407ab5fc546a9489b362901122d876fc42e2860[m
+Merge: b24845d e95c09f
+Author: bpaverin <bpaverin@gmail.com>
+Date:   Sun Mar 10 13:54:29 2024 +0300
+
+    Merge branch 'feature/title_category_genre' of github.com:tizzhh/api_yamdb into feature/title_category_genre
+
+[33mcommit b24845de481f6045c55a671b0200324d1d821f03[m
+Merge: 6a278bb 9b2ed8b
+Author: bpaverin <bpaverin@gmail.com>
+Date:   Sun Mar 10 13:49:29 2024 +0300
+
+    after 1st merge
+
+[33mcommit e95c09fbc271d54f7df503eb1136391c208d015a[m
+Author: Vadim Kuznetsov <darovadraste@gmail.com>
+Date:   Sun Mar 10 13:48:02 2024 +0300
+
+    Fix GenreViewSet: 405 on get category/{slug}/
+
+[33mcommit 6a278bb9488d6bbce9e517b68524c168c1fecbfb[m
+Author: bpaverin <bpaverin@gmail.com>
+Date:   Sun Mar 10 13:44:32 2024 +0300
+
+    my code
+
+[33mcommit 9b2ed8bc9d476c126a726df62476e77188ebf9de[m
+Author: Vadim Kuznetsov <darovadraste@gmail.com>
+Date:   Sun Mar 10 13:44:04 2024 +0300
+
+    fix isadminorsuperuser permission, categories tests done
+
+[33mcommit fa866248334719f38be02a7fcf1b320f3da6b676[m
+Author: bpaverin <bpaverin@gmail.com>
+Date:   Sun Mar 10 13:34:05 2024 +0300
+
+    first commit
+
+[33mcommit f3a66d01103d2db73699ca8d2416d9e7cde6963b[m
+Merge: 4d64dcb 5fbcfb5
+Author: bpaverin <bpaverin@gmail.com>
+Date:   Sat Mar 9 18:32:47 2024 +0300
+
+    Complete merging
+
+[33mcommit 4d64dcb139eec52fd5b152c5161bc2483bd72cab[m
+Author: bpaverin <bpaverin@gmail.com>
+Date:   Sat Mar 9 18:29:34 2024 +0300
+
+    Trying origin develop
+
+[33mcommit 5fbcfb56f5db3e9093cc598fed66a486008adb82[m[33m ([m[1;31morigin/develop[m[33m)[m
+Merge: a4981ac b2d2e13
+Author: Diana K <135751000+diiishka@users.noreply.github.com>
+Date:   Sat Mar 9 15:29:53 2024 +0300
+
+    Merge pull request #7 from tizzhh/feature/reviews-ratings-comments
+    
+    Feature/reviews ratings comments
+
+[33mcommit b2d2e13722efdf77c67ae3b695d391636e990c5d[m[33m ([m[1;31morigin/feature/reviews-ratings-comments[m[33m)[m
+Merge: 8b83eb2 a4981ac
+Author: Diana K <135751000+diiishka@users.noreply.github.com>
+Date:   Sat Mar 9 15:29:11 2024 +0300
+
+    Merge branch 'develop' into feature/reviews-ratings-comments
+
+[33mcommit 8b83eb2c666205fa8a8584ffbd6ca52506f209e4[m
+Author: Диана Кужамбетова <dkuzhambetova@yandex.ru>
+Date:   Sat Mar 9 15:14:57 2024 +0300
+
+    Update permission name in viewsets.
+
+[33mcommit a4981ac6a8187af88cd6bc6439961f9c49e0f1ed[m
+Author: Vadim Kuznetsov <darovadraste@gmail.com>
+Date:   Sat Mar 9 14:49:36 2024 +0300
+
+    Регистрация, токен, почта, модель юзера (#4)
+    
+    * New custom user model
+    
+    * signup progress
+    Fix CustomUser model
+    Post for User
+    
+    * Add separate user serializer for admin user creation
+    
+    * Add email service (#2)
+    
+    * Add users/ endpoint
+    
+    * Remove password from usermodel (#3)
+    
+    Add token through email code  obtaining
+    
+    * Fix token obtaining, return password field on user model
+    
+    * Fix superuser permission in users/
+    
+    * users/me/ endpoint complete
+    
+    * Small tweaks to permissions: change is_anon to is_auth
+    
+    * Remove excessive permission, add permission for PATCH/DEL for review/id/
+    
+    * Review fixes:
+    - move v1/ to api/urls from root url
+    - change user model a bit
+    - validation error instead of badrequest in validate
+    
+    * Fix permission AdminModerOrAuthor, add project-level permission
+
+[33mcommit f7e29240ebb90f59a78b94adab4101fdd6b8845d[m
+Author: Диана Кужамбетова <dkuzhambetova@yandex.ru>
+Date:   Sat Mar 9 14:28:09 2024 +0300
+
+    Fix variable name in CommentViewSet.
+
+[33mcommit 71db94908b13a3e470edbb7f8a4474c48d5aa103[m
+Author: Диана Кужамбетова <dkuzhambetova@yandex.ru>
+Date:   Sat Mar 9 12:53:41 2024 +0300
+
+    Create comment model, serializer, viewset, route.
+
+[33mcommit 2face788b9885621dabcece0097b6d22af16aa11[m
+Merge: d53cab7 9cb2ad7
+Author: Diana K <135751000+diiishka@users.noreply.github.com>
+Date:   Fri Mar 8 14:17:46 2024 +0300
+
+    Merge pull request #6 from tizzhh/feature/reviews-ratings-comments
+    
+    Create review model and serializer.
+
+[33mcommit 9cb2ad7c6fe948a6cabed39812a2b90c5c9b3476[m
+Merge: 1bf36fc d53cab7
+Author: Diana K <135751000+diiishka@users.noreply.github.com>
+Date:   Fri Mar 8 14:17:21 2024 +0300
+
+    Merge branch 'develop' into feature/reviews-ratings-comments
+
+[33mcommit 1bf36fcc3a3e76d99a8275ecb508ba71ab3bcb02[m
+Author: Диана Кужамбетова <dkuzhambetova@yandex.ru>
+Date:   Wed Mar 6 23:23:54 2024 +0300
+
+    Finalized viewsets and routes on Review model objects.
+
+[33mcommit c3693bee510bab8bca45ba835a1da707b8172412[m
+Author: Диана Кужамбетова <dkuzhambetova@yandex.ru>
+Date:   Wed Mar 6 01:54:03 2024 +0300
+
+    Create review model and serializer.
+
+[33mcommit d53cab7a0f50958b70b1eb57553623f8305ad9dc[m[33m ([m[1;31morigin/feature/serializers_and_views[m[33m, [m[1;32mdevelop[m[33m)[m
+Author: Борис Паверин <121819746+bpaverin@users.noreply.github.com>
+Date:   Tue Mar 5 23:02:00 2024 +0300
+
+    Feature/title model (#5)
+    
+    * Add models title, category, genre
+    
+    * Made some changes
+    
+    ---------
+    
+    Co-authored-by: Boris Paverin <bpaverin@yandex.ru>
+
+[33mcommit 3871ebb1445f9b5b2b398e12a0d52f34fb844713[m
+Author: Vadim Kuznetsov <darovadraste@gmail.com>
+Date:   Mon Mar 4 19:47:24 2024 +0300
+
+    add isort cfg
+
+[33mcommit ece86c424b365792b758a28fd08a231a831656f9[m
+Author: Vadim Kuznetsov <darovadraste@gmail.com>
+Date:   Mon Mar 4 19:46:40 2024 +0300
+
+    Start reviews app
+
+[33mcommit 5f6875381e68228b8bb04f0250e35a621692aa14[m[33m ([m[1;31morigin/master[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;32mmaster[m[33m)[m
+Author: Vadim Kuznetsov <darovadraste@gmail.com>
+Date:   Mon Mar 4 16:08:51 2024 +0300
+
+    Initial commit
