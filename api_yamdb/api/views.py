@@ -5,6 +5,7 @@ from django.core.exceptions import BadRequest
 from django.core.mail import send_mail
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, status, viewsets
 from rest_framework.decorators import api_view
 from rest_framework.mixins import (
@@ -191,18 +192,38 @@ class CategoryViewSet(
 
 
 class TitleViewSet(viewsets.ModelViewSet):
-    queryset = Title.objects.annotate(
-        rating=Avg('reviews__score')
-    ).order_by('id')
+    queryset = Title.objects.annotate(rating=Avg('reviews__score')).order_by(
+        'id'
+    )
     serializer_class = TitleSerializer
     pagination_class = PageNumberPagination
     permission_classes = (
         IsAdminOrSuperUser | DjangoModelPermissionsOrAnonReadOnly,
     )
+<<<<<<< HEAD
     # filter_backends = (DjangoFilterBackend,)
     # filterset_fields = ('category', 'genre', 'name', 'year') не работает, мб
     # сделать через filters.Filter кастомный создать в общем
+=======
+    filter_backends = (
+        DjangoFilterBackend,
+        filters.SearchFilter,
+    )
+    search_fields = (
+        'name',
+        'year',
+    )
+    filterset_fields = ('year', 'name')
+>>>>>>> ab809f77df9bc800cca307987d6d52df8ebbc8fd
     http_method_names = ['get', 'post', 'patch', 'delete']
+
+    def get_queryset(self):
+        queryset = Title.objects.all()
+        if genre_slug := self.request.query_params.get('genre'):
+            queryset = queryset.filter(genre__slug=genre_slug)
+        if category_slug := self.request.query_params.get('category'):
+            queryset = queryset.filter(category__slug=category_slug)
+        return queryset
 
     def get_serializer_class(self):
         if self.action in ['list', 'retrieve']:
