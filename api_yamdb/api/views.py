@@ -121,6 +121,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
         IsAuthenticatedOrReadOnly,
         IsAdminModerOrAuthorOrPostNew,
     )
+    http_method_names = ['get', 'post', 'patch', 'delete']
 
     def get_title(self):
         return get_object_or_404(Title, pk=self.kwargs['title_id'])
@@ -140,6 +141,7 @@ class CommentViewSet(viewsets.ModelViewSet):
         IsAuthenticatedOrReadOnly,
         IsAdminModerOrAuthorOrPostNew,
     )
+    http_method_names = ['get', 'post', 'patch', 'delete']
 
     def get_review(self):
         return get_object_or_404(Review, pk=self.kwargs['review_id'])
@@ -191,8 +193,11 @@ class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
     serializer_class = TitleSerializer
     pagination_class = PageNumberPagination
+    permission_classes = (
+        IsAdminOrSuperUser | DjangoModelPermissionsOrAnonReadOnly,
+    )
     filter_backends = (filters.SearchFilter,)
-    search_fields = ('=category', '=genre', '=name', '=year')
+    search_fields = ('=category', '=genre__slug', '=name', '=year')
     http_method_names = ['get', 'post', 'patch', 'delete']
 
     def get_serializer_class(self):

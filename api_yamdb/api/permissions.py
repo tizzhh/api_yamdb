@@ -13,7 +13,9 @@ class IsAdminOrSuperUser(permissions.BasePermission):
 
 class IsAdminModerOrAuthorOrPostNew(permissions.IsAuthenticatedOrReadOnly):
     def has_object_permission(self, request, view, obj):
-        return (
+        if view.action == 'retrieve':
+            return True
+        return request.user.is_authenticated and (
             view.action == 'create'
             or request.user.is_superuser
             or request.user.role == CustomUser.Roles.admin
