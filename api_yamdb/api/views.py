@@ -190,7 +190,9 @@ class CategoryViewSet(
 
 
 class TitleViewSet(viewsets.ModelViewSet):
-    queryset = Title.objects.all()
+    queryset = Title.objects.annotate(
+        rating=Avg('reviews__score')
+    ).order_by('id')
     serializer_class = TitleSerializer
     pagination_class = PageNumberPagination
     permission_classes = (
