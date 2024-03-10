@@ -1,11 +1,9 @@
 import datetime as dt
 
-from django.contrib.auth import get_user_model
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.db.models import CheckConstraint, Q
-
-User = get_user_model()
+from custom_user.models import CustomUser
 
 
 class Title(models.Model):
@@ -56,8 +54,6 @@ class Genre(models.Model):
     def __str__(self):
         return self.name
 
-from custom_user.models import CustomUser
-
 
 class Review(models.Model):
     """Model describes parameters of review on title."""
@@ -104,7 +100,7 @@ class Comment(models.Model):
     """Model describes objects of comments to review."""
 
     text = models.TextField('Текст комментария')
-    author = models.ForeigKey(
+    author = models.ForeignKey(
         CustomUser,
         on_delete=models.CASCADE,
         verbose_name='Пользователь'

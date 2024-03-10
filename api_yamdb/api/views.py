@@ -6,13 +6,19 @@ from django.shortcuts import get_object_or_404
 from rest_framework import filters, status, viewsets
 from rest_framework.decorators import api_view
 from rest_framework.pagination import PageNumberPagination
-from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
+from rest_framework.permissions import (IsAuthenticated,
+                                        IsAuthenticatedOrReadOnly)
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework.mixins import (CreateModelMixin, ListModelMixin,
+                                   DestroyModelMixin)
 
-from .permissions import IsAdminModerOrAuthorOrPostNew, IsAdminOrSuperUser
+from .permissions import IsAdminModerOrAuthorOrPostNew, IsAdminOrSuperUser, IsAdmin
 from .serializers import (
-    CommentSerializer
+    CommentSerializer,
+    CategorySerializer,
+    GenreSerializer,
+    TitleSerializer,
     CustomTokenObtainPairSerializer,
     ReviewSerializer,
     UserSerializerAdmin,
@@ -20,7 +26,7 @@ from .serializers import (
     UserSerializerReadPatch,
 )
 from custom_user.models import CustomUser
-from reviews.models import Review, Title
+from reviews.models import Review, Title, Category, Genre
 
 
 @api_view(['POST'])
@@ -69,7 +75,8 @@ class UserViewSetAuth(viewsets.ModelViewSet):
     def send_confirmation_code_email(self, data, confirmation_code):
         send_mail(
             subject='Confirmation code',
-            message=f'Dear {data.get("username")}, here\'s your confirmation code: {confirmation_code}',
+            message=(f'Dear {data.get("username")}, here\'s your confirmation'
+                     'code: {confirmation_code}'),
             from_email='yamdb@yamdb.net',
             recipient_list=(data.get('email'),),
             fail_silently=True,
@@ -96,7 +103,8 @@ class UserViewSetReadPatch(viewsets.ModelViewSet):
 
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
-    permission_classes = IsAuthenticatedOrReadOnly, IsAdminModerOrAuthorOrPostNew
+    permission_classes = (IsAuthenticatedOrReadOnly,
+                          IsAdminModerOrAuthorOrPostNew)
 
     def get_title(self):
         return get_object_or_404(Title, pk=self.kwargs['title_id'])
@@ -112,8 +120,8 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
-    permission_classes = IsAuthenticatedOrReadOnly, IsAdminModerOrAuthorOrPostNew
-    
+    permission_classes = (IsAuthenticatedOrReadOnly,
+                          IsAdminModerOrAuthorOrPostNew)
 
     def get_review(self):
         return get_object_or_404(Review, pk=self.kwargs['review_id'])
@@ -126,3 +134,39 @@ class CommentViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         return self.get_review().comments.all()
+
+
+class GenreViewSet(viewsets.ModelViewSet):
+    queryset = Genre.objects.all()
+    serializer_class = GenreSerializer
+    permission_classes = (IsAuthenticatedOrReadOnly,)
+    pagination_class = PageNumberPagination
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('=name',)
+    http_method_names = ['get', 'post', 'delete']
+    lookup_field = 'slug'
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        self.perform_destroy(instance)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class CategoryViewSet(ListModelMixin, CreateModelMixin, DestroyModelMixin, viewsets.GenericViewSet):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+    permission_classes = (IsAuthenticatedOrReadOnly, IsAdmin)
+    pagination_class = PageNumberPagination
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('=name',)
+    lookup_field = 'slug'
+
+
+class TitleViewSet(viewsets.ModelViewSet):
+    queryset = Title.objects.all()
+    serializer_class = TitleSerializer
+    permission_classes = (IsAdminModerOrAuthorOrPostNew,)
+    pagination_class = PageNumberPagination
+    filter_backends = (filters.SearchFilter)
+    search_fields = ('=category', '=genre', '=name', '=year')
+    http_method_names = ['get', 'post', 'patch', 'delete']
