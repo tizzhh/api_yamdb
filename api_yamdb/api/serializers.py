@@ -5,7 +5,7 @@ from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 from custom_user.models import CustomUser
-from reviews.models import Comment, Review, Title, Category, Genre
+from reviews.models import Category, Comment, Genre, Review, Title
 
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
@@ -119,14 +119,12 @@ class CommentSerializer(serializers.ModelSerializer):
 
 
 class CategorySerializer(serializers.ModelSerializer):
-
     class Meta:
         model = Category
         fields = ('name', 'slug')
 
 
 class GenreSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = Genre
         fields = ('name', 'slug')
