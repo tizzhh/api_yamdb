@@ -12,6 +12,7 @@ from rest_framework.mixins import (
 )
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import (
+    DjangoModelPermissionsOrAnonReadOnly,
     IsAuthenticated,
     IsAuthenticatedOrReadOnly,
 )
@@ -158,7 +159,9 @@ class GenreViewSet(
 ):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
-    permission_classes = (IsAdminOrSuperUser,)
+    permission_classes = (
+        IsAdminOrSuperUser | DjangoModelPermissionsOrAnonReadOnly,
+    )
     pagination_class = PageNumberPagination
     filter_backends = (filters.SearchFilter,)
     search_fields = ('=name',)
@@ -179,7 +182,9 @@ class CategoryViewSet(
 ):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
-    permission_classes = (IsAdminOrSuperUser,)
+    permission_classes = (
+        IsAdminOrSuperUser | DjangoModelPermissionsOrAnonReadOnly,
+    )
     pagination_class = PageNumberPagination
     filter_backends = (filters.SearchFilter,)
     search_fields = ('=name',)
