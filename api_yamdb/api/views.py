@@ -5,29 +5,37 @@ from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
 from rest_framework import filters, status, viewsets
 from rest_framework.decorators import api_view
+from rest_framework.mixins import (
+    CreateModelMixin,
+    DestroyModelMixin,
+    ListModelMixin,
+)
 from rest_framework.pagination import PageNumberPagination
-from rest_framework.permissions import (IsAuthenticated,
-                                        IsAuthenticatedOrReadOnly)
+from rest_framework.permissions import (
+    IsAuthenticated,
+    IsAuthenticatedOrReadOnly,
+)
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework.mixins import (CreateModelMixin, ListModelMixin,
-                                   DestroyModelMixin)
 
-from .permissions import (IsAdminModerOrAuthorOrPostNew, IsAdminOrSuperUser,
-                          GenreCategoryPermission)
+from .permissions import (
+    IsAdmin,
+    IsAdminModerOrAuthorOrPostNew,
+    IsAdminOrSuperUser,
+)
 from .serializers import (
-    CommentSerializer,
     CategorySerializer,
-    GenreSerializer,
-    TitleSerializer,
+    CommentSerializer,
     CustomTokenObtainPairSerializer,
+    GenreSerializer,
     ReviewSerializer,
+    TitleSerializer,
     UserSerializerAdmin,
     UserSerializerAuth,
     UserSerializerReadPatch,
 )
 from custom_user.models import CustomUser
-from reviews.models import Review, Title, Category, Genre
+from reviews.models import Category, Genre, Review, Title
 
 
 @api_view(['POST'])
@@ -76,8 +84,10 @@ class UserViewSetAuth(viewsets.ModelViewSet):
     def send_confirmation_code_email(self, data, confirmation_code):
         send_mail(
             subject='Confirmation code',
-            message=(f'Dear {data.get("username")}, here\'s your confirmation'
-                     'code: {confirmation_code}'),
+            message=(
+                f'Dear {data.get("username")}, here\'s your confirmation'
+                'code: {confirmation_code}'
+            ),
             from_email='yamdb@yamdb.net',
             recipient_list=(data.get('email'),),
             fail_silently=True,
@@ -104,8 +114,10 @@ class UserViewSetReadPatch(viewsets.ModelViewSet):
 
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
-    permission_classes = (IsAuthenticatedOrReadOnly,
-                          IsAdminModerOrAuthorOrPostNew)
+    permission_classes = (
+        IsAuthenticatedOrReadOnly,
+        IsAdminModerOrAuthorOrPostNew,
+    )
 
     def get_title(self):
         return get_object_or_404(Title, pk=self.kwargs['title_id'])
@@ -121,16 +133,17 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
-    permission_classes = (IsAuthenticatedOrReadOnly,
-                          IsAdminModerOrAuthorOrPostNew)
+    permission_classes = (
+        IsAuthenticatedOrReadOnly,
+        IsAdminModerOrAuthorOrPostNew,
+    )
 
     def get_review(self):
         return get_object_or_404(Review, pk=self.kwargs['review_id'])
 
     def perform_create(self, serializer):
         return serializer.save(
-            author=self.request.user,
-            review=self.get_review()
+            author=self.request.user, review=self.get_review()
         )
 
     def get_queryset(self):
@@ -141,18 +154,22 @@ class GenreViewSet(ListModelMixin, CreateModelMixin, DestroyModelMixin,
                    viewsets.GenericViewSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
-    permission_classes = (IsAuthenticatedOrReadOnly, GenreCategoryPermission)
+    permission_classes = (IsAuthenticatedOrReadOnly,)
     pagination_class = PageNumberPagination
     filter_backends = (filters.SearchFilter,)
     search_fields = ('=name',)
     lookup_field = 'slug'
 
 
-class CategoryViewSet(ListModelMixin, CreateModelMixin, DestroyModelMixin,
-                      viewsets.GenericViewSet):
+class CategoryViewSet(
+    ListModelMixin,
+    CreateModelMixin,
+    DestroyModelMixin,
+    viewsets.GenericViewSet,
+):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
-    permission_classes = (IsAuthenticatedOrReadOnly, GenreCategoryPermission)
+    permission_classes = (IsAdminOrSuperUser,)
     pagination_class = PageNumberPagination
     filter_backends = (filters.SearchFilter,)
     search_fields = ('=name',)
@@ -164,6 +181,6 @@ class TitleViewSet(viewsets.ModelViewSet):
     serializer_class = TitleSerializer
     permission_classes = (IsAdminModerOrAuthorOrPostNew,)
     pagination_class = PageNumberPagination
-    filter_backends = (filters.SearchFilter)
+    filter_backends = filters.SearchFilter
     search_fields = ('=category', '=genre', '=name', '=year')
     http_method_names = ['get', 'post', 'patch', 'delete']

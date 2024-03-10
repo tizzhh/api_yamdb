@@ -3,6 +3,7 @@ import datetime as dt
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.db.models import CheckConstraint, Q
+
 from custom_user.models import CustomUser
 
 
@@ -101,18 +102,13 @@ class Comment(models.Model):
 
     text = models.TextField('Текст комментария')
     author = models.ForeignKey(
-        CustomUser,
-        on_delete=models.CASCADE,
-        verbose_name='Пользователь'
+        CustomUser, on_delete=models.CASCADE, verbose_name='Пользователь'
     )
     pub_date = models.DateTimeField(
-        auto_now_add=True,
-        verbose_name='Дата публикации комментария'
+        auto_now_add=True, verbose_name='Дата публикации комментария'
     )
     review = models.ForeignKey(
-        Review,
-        on_delete=models.CASCADE,
-        verbose_name='Отзыв'
+        Review, on_delete=models.CASCADE, verbose_name='Отзыв'
     )
 
     class Meta:

@@ -3,11 +3,15 @@ from rest_framework import permissions
 from custom_user.models import CustomUser
 
 
-class IsAdminOrSuperUser(permissions.BasePermission):
+class IsAdminOrSuperUser(permissions.IsAuthenticatedOrReadOnly):
     def has_permission(self, request, view):
-        return request.user.is_superuser or (
-            request.user.is_authenticated
-            and request.user.role == CustomUser.Roles.admin
+        return (
+            request.method in permissions.SAFE_METHODS
+            or request.user.is_superuser
+            or (
+                request.user.is_authenticated
+                and request.user.role == CustomUser.Roles.admin
+            )
         )
 
 
@@ -22,11 +26,11 @@ class IsAdminModerOrAuthorOrPostNew(permissions.IsAuthenticatedOrReadOnly):
         )
 
 
-class GenreCategoryPermission(permissions.BasePermission):
-
+class IsAdmin(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
-        if view.action in ['create', 'destroy']:
-            return request.user.is_authenticated and request.user.is_superuser or (
-                request.user.is_authenticated
-                and request.user.role == CustomUser.Roles.admin
-            )
+        if view.action == 'retrieve':
+            return False
+        return request.user.is_superuser or (
+            request.user.is_authenticated
+            and request.user.role == CustomUser.Roles.admin
+        )
