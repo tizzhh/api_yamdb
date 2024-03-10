@@ -1,13 +1,12 @@
 from random import randint
 
-from rest_framework.exceptions import NotFound
 from django.core.exceptions import BadRequest
 from django.core.mail import send_mail
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
-from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, status, viewsets
 from rest_framework.decorators import api_view
+from rest_framework.exceptions import NotFound
 from rest_framework.mixins import (
     CreateModelMixin,
     DestroyModelMixin,
@@ -20,13 +19,9 @@ from rest_framework.permissions import (
     IsAuthenticatedOrReadOnly,
 )
 from rest_framework.response import Response
-from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from .permissions import (
-    IsAdminModerOrAuthorOrPostNew,
-    IsAdminOrSuperUser,
-)
+from .permissions import IsAdminModerOrAuthorOrPostNew, IsAdminOrSuperUser
 from .serializers import (
     CategorySerializer,
     CommentSerializer,
@@ -47,7 +42,6 @@ from reviews.models import Category, Genre, Review, Title
 def get_custom_token(request):
     serializer = CustomTokenObtainPairSerializer(data=request.data)
     if serializer.is_valid():
-        print(serializer.validated_data)
         refresh = RefreshToken.for_user(serializer.validated_data['USER'])
         return Response(
             {
@@ -200,18 +194,7 @@ class TitleViewSet(viewsets.ModelViewSet):
     permission_classes = (
         IsAdminOrSuperUser | DjangoModelPermissionsOrAnonReadOnly,
     )
-    # filter_backends = (DjangoFilterBackend,)
-    # filterset_fields = ('category', 'genre', 'name', 'year') не работает, мб
-    # сделать через filters.Filter кастомный создать в общем
     http_method_names = ['get', 'post', 'patch', 'delete']
-
-    def get_queryset(self):
-        queryset = Title.objects.all()
-        if genre_slug := self.request.query_params.get('genre'):
-            queryset = queryset.filter(genre__slug=genre_slug)
-        if category_slug := self.request.query_params.get('category'):
-            queryset = queryset.filter(category__slug=category_slug)
-        return queryset
 
     def get_serializer_class(self):
         if self.action in ['list', 'retrieve']:
@@ -238,7 +221,9 @@ class TitleViewSet(viewsets.ModelViewSet):
 
     def partial_update(self, request, *args, **kwargs):
         instance = self.get_object()
-        serializer = self.get_serializer(instance, data=request.data, partial=True)
+        serializer = self.get_serializer(
+            instance, data=request.data, partial=True
+        )
         serializer.is_valid(raise_exception=True)
 
         if 'category' in request.data:
@@ -246,7 +231,9 @@ class TitleViewSet(viewsets.ModelViewSet):
             try:
                 category_instance = Category.objects.get(slug=category_slug)
             except Category.DoesNotExist:
-                raise NotFound(f"Category with slug '{category_slug}' does not exist")
+                raise NotFound(
+                    f"Category with slug '{category_slug}' does not exist"
+                )
             instance.category = category_instance
 
         self.perform_update(serializer)
