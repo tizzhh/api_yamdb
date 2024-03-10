@@ -185,6 +185,6 @@ class TitleViewSet(viewsets.ModelViewSet):
     serializer_class = TitleSerializer
     permission_classes = (IsAdminModerOrAuthorOrPostNew,)
     pagination_class = PageNumberPagination
-    filter_backends = filters.SearchFilter
+    filter_backends = (filters.SearchFilter,)
     search_fields = ('=category', '=genre', '=name', '=year')
     http_method_names = ['get', 'post', 'patch', 'delete']
