@@ -24,13 +24,3 @@ class IsAdminModerOrAuthorOrPostNew(permissions.IsAuthenticatedOrReadOnly):
                 or request.user == obj.author
             )
         )
-
-
-class IsAdmin(permissions.BasePermission):
-    def has_object_permission(self, request, view, obj):
-        if view.action == 'retrieve':
-            return False
-        return request.user.is_superuser or (
-            request.user.is_authenticated
-            and request.user.role == CustomUser.Roles.admin
-        )

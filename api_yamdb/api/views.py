@@ -1,5 +1,6 @@
 from random import randint
 
+from rest_framework.exceptions import NotFound
 from django.core.exceptions import BadRequest
 from django.core.mail import send_mail
 from django.db.models import Avg
@@ -18,10 +19,10 @@ from rest_framework.permissions import (
     IsAuthenticatedOrReadOnly,
 )
 from rest_framework.response import Response
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from .permissions import (
-    IsAdmin,
     IsAdminModerOrAuthorOrPostNew,
     IsAdminOrSuperUser,
 )
@@ -198,8 +199,9 @@ class TitleViewSet(viewsets.ModelViewSet):
     permission_classes = (
         IsAdminOrSuperUser | DjangoModelPermissionsOrAnonReadOnly,
     )
-    filter_backends = (filters.SearchFilter,)
-    search_fields = ('=category', '=genre__slug', '=name', '=year')
+    # filter_backends = (DjangoFilterBackend,)
+    # filterset_fields = ('category', 'genre', 'name', 'year') не работает, мб
+    # сделать через filters.Filter кастомный создать в общем
     http_method_names = ['get', 'post', 'patch', 'delete']
 
     def get_serializer_class(self):
@@ -208,3 +210,35 @@ class TitleViewSet(viewsets.ModelViewSet):
         elif self.action in ['create', 'patch']:
             return TitleCreateSerializer
         return TitleSerializer
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        genre_slug = self.request.query_params.get('genre')
+        category_slug = self.request.query_params.get('category')
+        year = self.request.query_params.get('year')
+        name = self.request.query_params.get('name')
+        if genre_slug:
+            queryset = queryset.filter(genre__slug=genre_slug)
+        if category_slug:
+            queryset = queryset.filter(category__slug=category_slug)
+        if year:
+            queryset = queryset.filter(year=year)
+        if name:
+            queryset = queryset.filter(name=name)
+        return queryset
+
+    def partial_update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+
+        if 'category' in request.data:
+            category_slug = request.data['category']
+            try:
+                category_instance = Category.objects.get(slug=category_slug)
+            except Category.DoesNotExist:
+                raise NotFound(f"Category with slug '{category_slug}' does not exist")
+            instance.category = category_instance
+
+        self.perform_update(serializer)
+        return Response(serializer.data)
