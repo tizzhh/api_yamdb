@@ -10,7 +10,7 @@ from custom_user.models import CustomUser
 class Title(models.Model):
     name = models.CharField('Наименование', max_length=256)
     year = models.IntegerField('Год публикации')
-    description = models.TextField('Описание', blank=True)
+    description = models.TextField('Описание', null=True, blank=True)
     category = models.ForeignKey(
         'Category',
         on_delete=models.SET_NULL,
