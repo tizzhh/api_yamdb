@@ -150,10 +150,15 @@ class CommentViewSet(viewsets.ModelViewSet):
         return self.get_review().comments.all()
 
 
-class GenreViewSet(viewsets.ModelViewSet):
+class GenreViewSet(
+    ListModelMixin,
+    CreateModelMixin,
+    DestroyModelMixin,
+    viewsets.GenericViewSet,
+):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
-    permission_classes = (IsAuthenticatedOrReadOnly,)
+    permission_classes = (IsAdminOrSuperUser,)
     pagination_class = PageNumberPagination
     filter_backends = (filters.SearchFilter,)
     search_fields = ('=name',)
