@@ -13,7 +13,8 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.mixins import (CreateModelMixin, ListModelMixin,
                                    DestroyModelMixin)
 
-from .permissions import IsAdminModerOrAuthorOrPostNew, IsAdminOrSuperUser, IsAdmin
+from .permissions import (IsAdminModerOrAuthorOrPostNew, IsAdminOrSuperUser,
+                          GenreCategoryPermission)
 from .serializers import (
     CommentSerializer,
     CategorySerializer,
@@ -136,26 +137,22 @@ class CommentViewSet(viewsets.ModelViewSet):
         return self.get_review().comments.all()
 
 
-class GenreViewSet(viewsets.ModelViewSet):
+class GenreViewSet(ListModelMixin, CreateModelMixin, DestroyModelMixin,
+                   viewsets.GenericViewSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
-    permission_classes = (IsAuthenticatedOrReadOnly,)
+    permission_classes = (IsAuthenticatedOrReadOnly, GenreCategoryPermission)
     pagination_class = PageNumberPagination
     filter_backends = (filters.SearchFilter,)
     search_fields = ('=name',)
-    http_method_names = ['get', 'post', 'delete']
     lookup_field = 'slug'
 
-    def destroy(self, request, *args, **kwargs):
-        instance = self.get_object()
-        self.perform_destroy(instance)
-        return Response(status=status.HTTP_204_NO_CONTENT)
 
-
-class CategoryViewSet(ListModelMixin, CreateModelMixin, DestroyModelMixin, viewsets.GenericViewSet):
+class CategoryViewSet(ListModelMixin, CreateModelMixin, DestroyModelMixin,
+                      viewsets.GenericViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
-    permission_classes = (IsAuthenticatedOrReadOnly, IsAdmin)
+    permission_classes = (IsAuthenticatedOrReadOnly, GenreCategoryPermission)
     pagination_class = PageNumberPagination
     filter_backends = (filters.SearchFilter,)
     search_fields = ('=name',)

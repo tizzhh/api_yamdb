@@ -22,12 +22,11 @@ class IsAdminModerOrAuthorOrPostNew(permissions.IsAuthenticatedOrReadOnly):
         )
 
 
-class IsAdmin(permissions.BasePermission):
+class GenreCategoryPermission(permissions.BasePermission):
 
     def has_object_permission(self, request, view, obj):
-        if view.action == 'retrieve':
-            return False
-        return request.user.is_superuser or (
-            request.user.is_authenticated
-            and request.user.role == CustomUser.Roles.admin
-        )
+        if view.action in ['create', 'destroy']:
+            return request.user.is_authenticated and request.user.is_superuser or (
+                request.user.is_authenticated
+                and request.user.role == CustomUser.Roles.admin
+            )
