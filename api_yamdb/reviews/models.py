@@ -1,17 +1,15 @@
 import datetime as dt
 
-from django.contrib.auth import get_user_model
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.db.models import CheckConstraint, Q
 
-User = get_user_model()
+from custom_user.models import CustomUser
 
 
 class Title(models.Model):
     name = models.CharField('Наименование', max_length=256)
     year = models.IntegerField('Год публикации')
-    rating = ...  # Здесь нужно привязать рейтинг видимо с Review моделями...
     description = models.TextField('Описание', blank=True)
     category = models.ForeignKey(
         'Category',
@@ -56,8 +54,6 @@ class Genre(models.Model):
 
     def __str__(self):
         return self.name
-
-from custom_user.models import CustomUser
 
 
 class Review(models.Model):
@@ -105,19 +101,14 @@ class Comment(models.Model):
     """Model describes objects of comments to review."""
 
     text = models.TextField('Текст комментария')
-    author = models.ForeigKey(
-        CustomUser,
-        on_delete=models.CASCADE,
-        verbose_name='Пользователь'
+    author = models.ForeignKey(
+        CustomUser, on_delete=models.CASCADE, verbose_name='Пользователь'
     )
     pub_date = models.DateTimeField(
-        auto_now_add=True,
-        verbose_name='Дата публикации комментария'
+        auto_now_add=True, verbose_name='Дата публикации комментария'
     )
     review = models.ForeignKey(
-        Review,
-        on_delete=models.CASCADE,
-        verbose_name='Отзыв'
+        Review, on_delete=models.CASCADE, verbose_name='Отзыв'
     )
 
     class Meta:
