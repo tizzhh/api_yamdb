@@ -34,6 +34,7 @@ from .serializers import (
     UserSerializerAdmin,
     UserSerializerAuth,
     UserSerializerReadPatch,
+    TitleCreateSerializer
 )
 from custom_user.models import CustomUser
 from reviews.models import Category, Genre, Review, Title
@@ -188,8 +189,14 @@ class CategoryViewSet(
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
     serializer_class = TitleSerializer
-    permission_classes = (IsAdminModerOrAuthorOrPostNew,)
     pagination_class = PageNumberPagination
     filter_backends = (filters.SearchFilter,)
     search_fields = ('=category', '=genre', '=name', '=year')
     http_method_names = ['get', 'post', 'patch', 'delete']
+
+    def get_serializer_class(self):
+        if self.action in ['list', 'retrieve']:
+            return TitleSerializer
+        elif self.action in ['create', 'patch']:
+            return TitleCreateSerializer
+        return TitleSerializer
