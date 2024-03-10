@@ -31,11 +31,11 @@ from .serializers import (
     CustomTokenObtainPairSerializer,
     GenreSerializer,
     ReviewSerializer,
+    TitleCreateSerializer,
     TitleSerializer,
     UserSerializerAdmin,
     UserSerializerAuth,
     UserSerializerReadPatch,
-    TitleCreateSerializer
 )
 from custom_user.models import CustomUser
 from reviews.models import Category, Genre, Review, Title
