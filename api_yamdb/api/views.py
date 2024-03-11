@@ -85,7 +85,7 @@ class UserViewSetAuth(viewsets.ModelViewSet):
             subject='Confirmation code',
             message=(
                 f'Dear {data.get("username")}, here\'s your confirmation'
-                'code: {confirmation_code}'
+                f'code: {confirmation_code}'
             ),
             from_email='yamdb@yamdb.net',
             recipient_list=(data.get('email'),),

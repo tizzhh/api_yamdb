@@ -3,20 +3,22 @@ from rest_framework.routers import DefaultRouter
 
 from api import views
 
-router = DefaultRouter()
-router.register(
+api_v1_router = DefaultRouter()
+api_v1_router.register(
     r'titles/(?P<title_id>\d+)/reviews',
     views.ReviewViewSet,
     basename='reviews',
 )
-router.register(
+api_v1_router.register(
     r'titles/(?P<title_id>\d+)/reviews/(?P<review_id>\d+)/comments',
     views.CommentViewSet,
     basename='comments',
 )
-router.register('genres', views.GenreViewSet, basename='genres')
-router.register('categories', views.CategoryViewSet, basename='categories')
-router.register('titles', views.TitleViewSet, basename='titles')
+api_v1_router.register('genres', views.GenreViewSet, basename='genres')
+api_v1_router.register(
+    'categories', views.CategoryViewSet, basename='categories'
+)
+api_v1_router.register('titles', views.TitleViewSet, basename='titles')
 
 
 urlpatterns = [
@@ -57,5 +59,5 @@ urlpatterns = [
         ),
         name='users-admin',
     ),
-    path('v1/', include(router.urls)),
+    path('v1/', include(api_v1_router.urls)),
 ]
