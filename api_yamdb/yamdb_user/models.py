@@ -3,7 +3,7 @@ from django.db import models
 from django.db.models import CheckConstraint, Q
 
 
-class CustomUser(AbstractUser):
+class YamdbUser(AbstractUser):
     class Roles(models.TextChoices):
         user = 'user'
         moderator = 'moderator'

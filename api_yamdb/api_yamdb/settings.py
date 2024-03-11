@@ -24,7 +24,8 @@ INSTALLED_APPS = [
     'django_filters',
     'api.apps.ApiConfig',
     'reviews.apps.ReviewsConfig',
-    'custom_user.apps.CustomUserConfig',
+    # 'yamdb_user.apps.YamdbUserConfig',
+    'yamdb_user.apps.YamdbUserConfig',
 ]
 
 MIDDLEWARE = [
@@ -121,7 +122,7 @@ STATIC_URL = '/static/'
 
 STATICFILES_DIRS = ((BASE_DIR / 'static/'),)
 
-AUTH_USER_MODEL = 'custom_user.CustomUser'
+AUTH_USER_MODEL = 'yamdb_user.YamdbUser'
 
 EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
 

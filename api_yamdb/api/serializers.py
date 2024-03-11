@@ -4,8 +4,8 @@ from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
-from custom_user.models import CustomUser
 from reviews.models import Category, Comment, Genre, Review, Title
+from yamdb_user.models import YamdbUser
 
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
@@ -18,7 +18,7 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):
         username = attrs['username']
         confirmation_code = attrs['confirmation_code']
-        user = get_object_or_404(CustomUser, username=username)
+        user = get_object_or_404(YamdbUser, username=username)
         if confirmation_code != user.confirmation_code:
             raise BadRequest('Incorrect confirmation code')
         attrs['USER'] = user
@@ -27,7 +27,7 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
 
 class BaseUserSerializer(serializers.ModelSerializer):
     class Meta:
-        model = CustomUser
+        model = YamdbUser
         fields = (
             'username',
             'email',
@@ -45,7 +45,7 @@ class UserSerializerAuth(BaseUserSerializer):
 
 class UserSerializerAdmin(BaseUserSerializer):
     class Meta:
-        model = CustomUser
+        model = YamdbUser
         fields = (
             'username',
             'email',
@@ -58,7 +58,7 @@ class UserSerializerAdmin(BaseUserSerializer):
 
 class UserSerializerReadPatch(BaseUserSerializer):
     class Meta:
-        model = CustomUser
+        model = YamdbUser
         fields = (
             'username',
             'email',

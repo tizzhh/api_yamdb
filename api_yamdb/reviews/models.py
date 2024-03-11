@@ -4,7 +4,7 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.db.models import CheckConstraint, Q
 
-from custom_user.models import CustomUser
+from yamdb_user.models import YamdbUser
 
 
 class Title(models.Model):
@@ -66,7 +66,7 @@ class Review(models.Model):
         verbose_name='Произведение',
     )
     author = models.ForeignKey(
-        CustomUser,
+        YamdbUser,
         on_delete=models.CASCADE,
         verbose_name='Пользователь',
     )
@@ -102,7 +102,7 @@ class Comment(models.Model):
 
     text = models.TextField('Текст комментария')
     author = models.ForeignKey(
-        CustomUser, on_delete=models.CASCADE, verbose_name='Пользователь'
+        YamdbUser, on_delete=models.CASCADE, verbose_name='Пользователь'
     )
     pub_date = models.DateTimeField(
         auto_now_add=True, verbose_name='Дата публикации комментария'

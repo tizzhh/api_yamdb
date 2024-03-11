@@ -34,8 +34,8 @@ from .serializers import (
     UserSerializerAuth,
     UserSerializerReadPatch,
 )
-from custom_user.models import CustomUser
 from reviews.models import Category, Genre, Review, Title
+from yamdb_user.models import YamdbUser
 
 
 @api_view(['POST'])
@@ -54,11 +54,11 @@ def get_custom_token(request):
 
 
 class UserViewSetAuth(viewsets.ModelViewSet):
-    queryset = CustomUser.objects.all()
+    queryset = YamdbUser.objects.all()
     serializer_class = UserSerializerAuth
 
     def create(self, request, *args, **kwargs):
-        user = CustomUser.objects.filter(username=request.data.get('username'))
+        user = YamdbUser.objects.filter(username=request.data.get('username'))
         serializer = self.get_serializer(data=request.data)
         if not user:
             serializer.is_valid(raise_exception=True)
@@ -70,7 +70,7 @@ class UserViewSetAuth(viewsets.ModelViewSet):
         confirmation_code = randint(10000, 99999)
         self.send_confirmation_code_email(request.data, confirmation_code)
 
-        user = CustomUser.objects.get(username=request.data.get('username'))
+        user = YamdbUser.objects.get(username=request.data.get('username'))
         user.confirmation_code = confirmation_code
         user.save()
 
@@ -94,7 +94,7 @@ class UserViewSetAuth(viewsets.ModelViewSet):
 
 
 class UserViewSetAdmin(viewsets.ModelViewSet):
-    queryset = CustomUser.objects.all()
+    queryset = YamdbUser.objects.all()
     serializer_class = UserSerializerAdmin
     permission_classes = (IsAdminOrSuperUser,)
     lookup_field = 'username'
@@ -108,7 +108,7 @@ class UserViewSetReadPatch(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated,)
 
     def get_object(self):
-        return get_object_or_404(CustomUser, username=self.request.user)
+        return get_object_or_404(YamdbUser, username=self.request.user)
 
 
 class ReviewViewSet(viewsets.ModelViewSet):

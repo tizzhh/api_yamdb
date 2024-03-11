@@ -1,13 +1,13 @@
 from rest_framework import permissions
 
-from custom_user.models import CustomUser
+from yamdb_user.models import YamdbUser
 
 
 class IsAdminOrSuperUser(permissions.BasePermission):
     def has_permission(self, request, view):
         return request.user.is_superuser or (
             request.user.is_authenticated
-            and request.user.role == CustomUser.Roles.admin
+            and request.user.role == YamdbUser.Roles.admin
         )
 
 
@@ -19,8 +19,8 @@ class IsAdminModerOrAuthorOrPostNew(permissions.IsAuthenticatedOrReadOnly):
             and (
                 view.action == 'create'
                 or request.user.is_superuser
-                or request.user.role == CustomUser.Roles.admin
-                or request.user.role == CustomUser.Roles.moderator
+                or request.user.role == YamdbUser.Roles.admin
+                or request.user.role == YamdbUser.Roles.moderator
                 or request.user == obj.author
             )
         )
