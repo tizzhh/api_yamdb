@@ -1,9 +1,11 @@
 from django import forms
+from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.core.exceptions import BadRequest
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainSerializer
+from rest_framework_simplejwt.tokens import RefreshToken
 
 from reviews.models import Category, Comment, Genre, Review, Title, YamdbUser
 
@@ -16,15 +18,14 @@ class CustomTokenObtainPairSerializer(TokenObtainSerializer):
         self.fields['confirmation_code'] = serializers.CharField()
 
     def get_token(cls, user):
-        return super().get_token(user)
+        return RefreshToken.for_user(user)
 
     def validate(self, attrs):
         username = attrs['username']
         confirmation_code = attrs['confirmation_code']
         user = get_object_or_404(YamdbUser, username=username)
-        if confirmation_code != user.confirmation_code:
+        if not default_token_generator.check_token(user, confirmation_code):
             raise forms.ValidationError('Incorrect confirmation code')
-        attrs['USER'] = user
         return attrs
 
 

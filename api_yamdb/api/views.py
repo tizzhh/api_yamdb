@@ -1,6 +1,6 @@
-from random import randint
-
 from django import forms
+from django.conf import settings
+from django.contrib.auth.tokens import default_token_generator
 from django.core.exceptions import BadRequest
 from django.core.mail import send_mail
 from django.db.models import Avg
@@ -45,7 +45,7 @@ from yamdb_user.models import YamdbUser
 def get_custom_token(request):
     serializer = CustomTokenObtainPairSerializer(data=request.data)
     serializer.is_valid(True)
-    refresh = serializer.get_token()
+    refresh = serializer.get_token(request.user)
     return Response(
         {
             'access': str(refresh.access_token),
@@ -67,13 +67,10 @@ class UserViewSetAuth(viewsets.ModelViewSet):
 
         if user and user[0].email != request.data.get('email'):
             raise BadRequest('Incorrect email')
-        default_token_generator.make_token(user)
-        confirmation_code = randint(10000, 99999)
-        self.send_confirmation_code_email(request.data, confirmation_code)
 
-        user = YamdbUser.objects.get(username=request.data.get('username'))
-        user.confirmation_code = confirmation_code
-        user.save()
+        user = YamdbUser.objects.filter(username=request.data.get('username'))
+        confirmation_code = default_token_generator.make_token(user[0])
+        self.send_confirmation_code_email(request.data, confirmation_code)
 
         headers = self.get_success_headers(serializer.initial_data)
 
@@ -88,7 +85,7 @@ class UserViewSetAuth(viewsets.ModelViewSet):
                 f'Dear {data.get("username")}, here\'s your confirmation'
                 f'code: {confirmation_code}'
             ),
-            from_email='yamdb@yamdb.net',
+            from_email=settings.YAMBD_EMAIL,
             recipient_list=(data.get('email'),),
             fail_silently=True,
         )

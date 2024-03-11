@@ -24,7 +24,6 @@ INSTALLED_APPS = [
     'django_filters',
     'api.apps.ApiConfig',
     'reviews.apps.ReviewsConfig',
-    # 'yamdb_user.apps.YamdbUserConfig',
     'yamdb_user.apps.YamdbUserConfig',
 ]
 
@@ -125,5 +124,7 @@ STATICFILES_DIRS = ((BASE_DIR / 'static/'),)
 AUTH_USER_MODEL = 'yamdb_user.YamdbUser'
 
 EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
+
+YAMBD_EMAIL = 'yamdb@yamdb.net'
 
 EMAIL_FILE_PATH = BASE_DIR / 'sent_emails'
