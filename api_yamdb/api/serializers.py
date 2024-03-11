@@ -1,7 +1,8 @@
 from django import forms
+from django.conf import settings
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth.validators import UnicodeUsernameValidator
-from django.core.exceptions import BadRequest
+from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainSerializer
@@ -29,49 +30,55 @@ class CustomTokenObtainPairSerializer(TokenObtainSerializer):
         return attrs
 
 
-# class BaseUserSerializer(serializers.ModelSerializer):
 class BaseUserSerializer:
-    # class Meta:
-    #     model = YamdbUser
-    #     fields = (
-    #         'username',
-    #         'email',
-    #     )
-
     def validate_username(self, value):
         if value == 'me':
             raise forms.ValidationError('Username cannot be "me"')
         return value
 
 
-class UserSerializerAuth(serializers.ModelSerializer):
-    # username = serializers.CharField(max_length=150, validators=[UnicodeUsernameValidator()])
-    # email = serializers.EmailField(max_length=254)
+class UserSerializerAuth(serializers.Serializer, BaseUserSerializer):
+    username = serializers.CharField(
+        max_length=150, validators=[UnicodeUsernameValidator()]
+    )
+    email = serializers.EmailField(max_length=254)
 
+    def validate(self, attrs):
+        username = attrs.get('username')
+        email = attrs.get('email')
+        if (
+            not YamdbUser.objects.filter(email=email).exists()
+            and not YamdbUser.objects.filter(username=username).exists()
+        ) or YamdbUser.objects.filter(email=email, username=username).exists():
+            return attrs
+        raise forms.ValidationError('Email/username already taken')
+
+    def create(self, validated_data):
+        user = YamdbUser.objects.get_or_create(**validated_data)
+        confirmation_code = default_token_generator.make_token(user[0])
+        self.send_confirmation_code_email(validated_data, confirmation_code)
+
+        return user
+
+    def send_confirmation_code_email(self, data, confirmation_code):
+        send_mail(
+            subject='Confirmation code',
+            message=(
+                f'Dear {data.get("username")}, here\'s your confirmation'
+                f'code: {confirmation_code}'
+            ),
+            from_email=settings.YAMBD_EMAIL,
+            recipient_list=(data.get('email'),),
+            fail_silently=True,
+        )
+
+
+class UserSerializerAdmin(serializers.ModelSerializer, BaseUserSerializer):
     class Meta:
         model = YamdbUser
         fields = (
             'username',
             'email',
-        )
-
-    def validate_username(self, value):
-        if value == 'me':
-            raise forms.ValidationError('Username cannot be "me"')
-        return value
-
-    # def create(self, validated_data):
-    #     return YamdbUser.objects.create(**validated_data)
-    # def validate_username(self, value):
-    #     if value == 'me':
-    #         raise forms.ValidationError('Username cannot be "me"')
-    #     return value
-
-
-class UserSerializerAdmin(UserSerializerAuth):
-    class Meta(UserSerializerAuth.Meta):
-        # model = YamdbUser
-        fields = UserSerializerAuth.Meta.fields + (
             'first_name',
             'last_name',
             'bio',

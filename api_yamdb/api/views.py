@@ -1,8 +1,3 @@
-from django import forms
-from django.conf import settings
-from django.contrib.auth.tokens import default_token_generator
-from django.core.exceptions import BadRequest
-from django.core.mail import send_mail
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from rest_framework import filters, status, viewsets
@@ -19,6 +14,7 @@ from rest_framework.permissions import (
     IsAuthenticatedOrReadOnly,
 )
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from .permissions import (
     IsAdminModerOrAuthor,
@@ -44,7 +40,7 @@ from yamdb_user.models import YamdbUser
 @api_view(['POST'])
 def get_custom_token(request):
     serializer = CustomTokenObtainPairSerializer(data=request.data)
-    serializer.is_valid(True)
+    serializer.is_valid(raise_exception=True)
     refresh = serializer.get_token(request.user)
     return Response(
         {
@@ -54,41 +50,16 @@ def get_custom_token(request):
     )
 
 
-class UserViewSetAuth(viewsets.ModelViewSet):
-    queryset = YamdbUser.objects.all()
-    serializer_class = UserSerializerAuth
+@api_view(['POST'])
+def user_view_set_auth(request):
+    serializer = UserSerializerAuth(data=request.data)
+    serializer.is_valid(True)
+    serializer.save()
 
-    def create(self, request, *args, **kwargs):
-        user = YamdbUser.objects.filter(username=request.data.get('username'))
-        serializer = self.get_serializer(data=request.data)
-        if not user:
-            serializer.is_valid(raise_exception=True)
-            self.perform_create(serializer)
-
-        if user and user[0].email != request.data.get('email'):
-            raise BadRequest('Incorrect email')
-
-        user = YamdbUser.objects.filter(username=request.data.get('username'))
-        confirmation_code = default_token_generator.make_token(user[0])
-        self.send_confirmation_code_email(request.data, confirmation_code)
-
-        headers = self.get_success_headers(serializer.initial_data)
-
-        return Response(
-            serializer.initial_data, status=status.HTTP_200_OK, headers=headers
-        )
-
-    def send_confirmation_code_email(self, data, confirmation_code):
-        send_mail(
-            subject='Confirmation code',
-            message=(
-                f'Dear {data.get("username")}, here\'s your confirmation'
-                f'code: {confirmation_code}'
-            ),
-            from_email=settings.YAMBD_EMAIL,
-            recipient_list=(data.get('email'),),
-            fail_silently=True,
-        )
+    return Response(
+        serializer.initial_data,
+        status=status.HTTP_200_OK,
+    )
 
 
 class UserViewSetAdmin(viewsets.ModelViewSet):

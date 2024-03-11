@@ -24,7 +24,7 @@ api_v1_router.register('titles', views.TitleViewSet, basename='titles')
 urlpatterns = [
     path(
         'v1/auth/signup/',
-        views.UserViewSetAuth.as_view({'post': 'create'}),
+        views.user_view_set_auth,
         name='signup',
     ),
     path('v1/auth/token/', views.get_custom_token, name='jwt-token'),
