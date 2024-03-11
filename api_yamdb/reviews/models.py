@@ -1,16 +1,28 @@
-import datetime as dt
-
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
-from django.db.models import CheckConstraint, Q
+from django.utils import timezone
+from django.core.exceptions import ValidationError
 
 from custom_user.models import CustomUser
+from .constants import NAME_MAX_LENGTH, SLUG_MAX_LENGTH
+
+
+class CategoryGenreAbstract(models.Model):
+    name = models.CharField('Наименование', max_length=NAME_MAX_LENGTH)
+    slug = models.SlugField('Слаг', unique=True, max_length=SLUG_MAX_LENGTH)
+
+    class Meta:
+        abstract = True
+        ordering = ('name',)
+
+    def __str__(self):
+        return self.name
 
 
 class Title(models.Model):
-    name = models.CharField('Наименование', max_length=256)
-    year = models.IntegerField('Год публикации')
-    description = models.TextField('Описание', null=True, blank=True)
+    name = models.CharField('Наименование', max_length=NAME_MAX_LENGTH)
+    year = models.PositiveSmallIntegerField('Год публикации')
+    description = models.TextField('Описание', blank=True, default='')
     category = models.ForeignKey(
         'Category',
         on_delete=models.SET_NULL,
@@ -21,39 +33,25 @@ class Title(models.Model):
 
     class Meta:
         default_related_name = 'titles'
-        ordering = ['name', 'year', 'category']
+        ordering = ('name', 'year', 'category')
 
-        constraints = [
-            CheckConstraint(
-                check=Q(year__lte=dt.datetime.now().year),
-                name='Год выпуска не может быть больше текущего',
-            )
-        ]
-
-    def __str__(self):
-        return self.name
-
-
-class Category(models.Model):
-    name = models.CharField('Наименование', max_length=256)
-    slug = models.SlugField('Слаг', unique=True, max_length=50)
-
-    class Meta:
-        ordering = ['name']
+    def clean(self) -> None:
+        super().clean()
+        current_year = timezone.now().year
+        if self.year > current_year:
+            raise ValidationError({'year': 'Год публикации не может быть'
+                                   'больше текущего'})
 
     def __str__(self):
         return self.name
 
 
-class Genre(models.Model):
-    name = models.CharField('Наименование', max_length=256)
-    slug = models.SlugField('Слаг', unique=True, max_length=50)
+class Category(CategoryGenreAbstract):
+    pass
 
-    class Meta:
-        ordering = ['name']
 
-    def __str__(self):
-        return self.name
+class Genre(CategoryGenreAbstract):
+    pass
 
 
 class Review(models.Model):

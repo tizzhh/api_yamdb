@@ -12,6 +12,7 @@ from rest_framework.mixins import (
     DestroyModelMixin,
     ListModelMixin,
 )
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import (
     DjangoModelPermissionsOrAnonReadOnly,
@@ -20,6 +21,7 @@ from rest_framework.permissions import (
 )
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
+from django_filters import FilterSet, CharFilter, NumberFilter
 
 from .permissions import IsAdminModerOrAuthorOrPostNew, IsAdminOrSuperUser
 from .serializers import (
@@ -29,13 +31,24 @@ from .serializers import (
     GenreSerializer,
     ReviewSerializer,
     TitleCreateSerializer,
-    TitleSerializer,
+    TitleReadSerializer,
     UserSerializerAdmin,
     UserSerializerAuth,
     UserSerializerReadPatch,
 )
 from custom_user.models import CustomUser
 from reviews.models import Category, Genre, Review, Title
+
+
+class TitleFilter(FilterSet):
+    genre = CharFilter(field_name='genre__slug')
+    category = CharFilter(field_name='category__slug')
+    year = NumberFilter(field_name='year')
+    name = CharFilter(field_name='name')
+
+    class Meta:
+        model = Title
+        fields = ['genre', 'category', 'year', 'name']
 
 
 @api_view(['POST'])
@@ -117,7 +130,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
         IsAuthenticatedOrReadOnly,
         IsAdminModerOrAuthorOrPostNew,
     )
-    http_method_names = ['get', 'post', 'patch', 'delete']
+    http_method_names = ('get', 'post', 'patch', 'delete')
 
     def get_title(self):
         return get_object_or_404(Title, pk=self.kwargs['title_id'])
@@ -137,7 +150,7 @@ class CommentViewSet(viewsets.ModelViewSet):
         IsAuthenticatedOrReadOnly,
         IsAdminModerOrAuthorOrPostNew,
     )
-    http_method_names = ['get', 'post', 'patch', 'delete']
+    http_method_names = ('get', 'post', 'patch', 'delete')
 
     def get_review(self):
         return get_object_or_404(Review, pk=self.kwargs['review_id'])
@@ -151,76 +164,51 @@ class CommentViewSet(viewsets.ModelViewSet):
         return self.get_review().comments.all()
 
 
-class GenreViewSet(
+class CategoryGenreBaseViewSet(
     ListModelMixin,
     CreateModelMixin,
     DestroyModelMixin,
-    viewsets.GenericViewSet,
+    viewsets.GenericViewSet
 ):
+    permission_classes = (
+        IsAdminOrSuperUser | DjangoModelPermissionsOrAnonReadOnly,
+    )
+    pagination_class = PageNumberPagination
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('=name',)
+    lookup_field = 'slug'
+
+
+class GenreViewSet(CategoryGenreBaseViewSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
-    permission_classes = (
-        IsAdminOrSuperUser | DjangoModelPermissionsOrAnonReadOnly,
-    )
-    pagination_class = PageNumberPagination
-    filter_backends = (filters.SearchFilter,)
-    search_fields = ('=name',)
-    lookup_field = 'slug'
 
 
-class CategoryViewSet(
-    ListModelMixin,
-    CreateModelMixin,
-    DestroyModelMixin,
-    viewsets.GenericViewSet,
-):
+class CategoryViewSet(CategoryGenreBaseViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
-    permission_classes = (
-        IsAdminOrSuperUser | DjangoModelPermissionsOrAnonReadOnly,
-    )
-    pagination_class = PageNumberPagination
-    filter_backends = (filters.SearchFilter,)
-    search_fields = ('=name',)
-    lookup_field = 'slug'
 
 
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.annotate(rating=Avg('reviews__score')).order_by(
-        'id'
+        'name'
     )
-    serializer_class = TitleSerializer
+    serializer_class = TitleReadSerializer
     pagination_class = PageNumberPagination
     permission_classes = (
-        IsAdminOrSuperUser | DjangoModelPermissionsOrAnonReadOnly,
+       IsAdminOrSuperUser | DjangoModelPermissionsOrAnonReadOnly,
     )
-    http_method_names = ['get', 'post', 'patch', 'delete']
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = TitleFilter
+    http_method_names = ('get', 'post', 'patch', 'delete')
 
     def get_serializer_class(self):
-        if self.action in ['list', 'retrieve']:
-            return TitleSerializer
-        elif self.action in ['create', 'patch']:
+        if self.action in ['create', 'patch']:
             return TitleCreateSerializer
-        return TitleSerializer
+        return TitleReadSerializer
 
-    def get_queryset(self):
-        queryset = super().get_queryset()
-        genre_slug = self.request.query_params.get('genre')
-        category_slug = self.request.query_params.get('category')
-        year = self.request.query_params.get('year')
-        name = self.request.query_params.get('name')
-        if genre_slug:
-            queryset = queryset.filter(genre__slug=genre_slug)
-        if category_slug:
-            queryset = queryset.filter(category__slug=category_slug)
-        if year:
-            queryset = queryset.filter(year=year)
-        if name:
-            queryset = queryset.filter(name=name)
-        return queryset
-
-    def partial_update(self, request, *args, **kwargs):
-        instance = self.get_object()
+    def partial_update(self, request, *args, **kwargs):  # я в общем вообще
+        instance = self.get_object()                     # без понятия как
         serializer = self.get_serializer(
             instance, data=request.data, partial=True
         )
