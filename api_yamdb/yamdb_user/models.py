@@ -9,11 +9,10 @@ class YamdbUser(AbstractUser):
         MODERATOR = 'moderator'
         ADMIN = 'admin'
 
-    password = None
     email = models.EmailField(
         unique=True, max_length=254, null=False, blank=False
     )
-    bio = models.TextField('Биография', null=True, blank=True)
+    bio = models.TextField('Биография', blank=True)
     role = models.CharField(
         'Роль',
         choices=Roles.choices,

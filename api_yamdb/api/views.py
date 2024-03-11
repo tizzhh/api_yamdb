@@ -32,18 +32,17 @@ from .serializers import (
     UserSerializerAuth,
     UserSerializerReadPatch,
 )
-from reviews.models import Category, Genre, Review, Title
-from yamdb_user.models import YamdbUser
+from reviews.models import Category, Genre, Review, Title, YamdbUser
 
 
 @api_view(['POST'])
 def get_custom_token(request):
     serializer = CustomTokenObtainPairSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
-    refresh = serializer.get_token(request.user)
+    refresh = serializer.get_token(serializer.validated_data['USER'])
     return Response(
         {
-            'access': str(refresh.access_token),
+            'token': str(refresh.access_token),
         },
         status=status.HTTP_200_OK,
     )
@@ -65,22 +64,30 @@ class UserViewSetAdmin(viewsets.ModelViewSet):
     queryset = YamdbUser.objects.all()
     serializer_class = UserSerializerAdmin
     permission_classes = (IsAdminOrSuperUser,)
-    lookup_field = 'username'
+    lookup_field = "username"
     filter_backends = (filters.SearchFilter,)
     search_fields = ('username',)
+    http_method_names = (
+        'get',
+        'post',
+        'patch',
+        'delete',
+    )
 
-    # @action(detail=True, methods=['get'], permission_classes=[IsAuthenticated])
-    # def retrieve_me(self, request):
-    #     # user = self.get_object()
-    #     serializer = UserSerializerReadPatch(data=request.data)
-    #     return Response(serializer.data)
-
-    # @action(detail=True, methods=['patch'], permission_classes=[IsAuthenticated])
-    # def retrieve_me(self, request):
-    #     serializer = UserSerializerReadPatch(data=request.data)
-    #     serializer.is_valid(raise_exception=True)
-    #     serializer.save()
-    #     return Response(serializer.data)
+    @action(
+        detail=False,
+        methods=['get', 'patch'],
+        permission_classes=[IsAuthenticated],
+        url_path='me',
+    )
+    def retrieve_me(self, request):
+        serializer = UserSerializerReadPatch(
+            self.request.user, data=request.data, partial=True
+        )
+        serializer.is_valid(raise_exception=True)
+        if request.method == 'PATCH':
+            serializer.save()
+        return Response(serializer.data)
 
 
 class UserViewSetReadPatch(viewsets.ModelViewSet):

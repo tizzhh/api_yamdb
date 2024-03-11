@@ -19,7 +19,7 @@ api_v1_router.register(
     'categories', views.CategoryViewSet, basename='categories'
 )
 api_v1_router.register('titles', views.TitleViewSet, basename='titles')
-
+api_v1_router.register('users', views.UserViewSetAdmin, basename='users')
 
 urlpatterns = [
     path(
@@ -28,36 +28,5 @@ urlpatterns = [
         name='signup',
     ),
     path('v1/auth/token/', views.get_custom_token, name='jwt-token'),
-    path(
-        'v1/users/',
-        views.UserViewSetAdmin.as_view(
-            {
-                'get': 'list',
-                'post': 'create',
-            }
-        ),
-        name='users-admin',
-    ),
-    path(
-        'v1/users/me/',
-        views.UserViewSetReadPatch.as_view(
-            {
-                'get': 'retrieve',
-                'patch': 'partial_update',
-            }
-        ),
-        name='users-me',
-    ),
-    path(
-        'v1/users/<slug:username>/',
-        views.UserViewSetAdmin.as_view(
-            {
-                'get': 'retrieve',
-                'patch': 'partial_update',
-                'delete': 'destroy',
-            }
-        ),
-        name='users-admin',
-    ),
     path('v1/', include(api_v1_router.urls)),
 ]

@@ -1,4 +1,3 @@
-from django import forms
 from django.conf import settings
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth.validators import UnicodeUsernameValidator
@@ -26,14 +25,15 @@ class CustomTokenObtainPairSerializer(TokenObtainSerializer):
         confirmation_code = attrs['confirmation_code']
         user = get_object_or_404(YamdbUser, username=username)
         if not default_token_generator.check_token(user, confirmation_code):
-            raise forms.ValidationError('Incorrect confirmation code')
+            raise serializers.ValidationError('Incorrect confirmation code')
+        attrs['USER'] = user
         return attrs
 
 
 class BaseUserSerializer:
     def validate_username(self, value):
         if value == 'me':
-            raise forms.ValidationError('Username cannot be "me"')
+            raise serializers.ValidationError('Username cannot be "me"')
         return value
 
 
@@ -51,7 +51,7 @@ class UserSerializerAuth(serializers.Serializer, BaseUserSerializer):
             and not YamdbUser.objects.filter(username=username).exists()
         ) or YamdbUser.objects.filter(email=email, username=username).exists():
             return attrs
-        raise forms.ValidationError('Email/username already taken')
+        raise serializers.ValidationError('Email/username already taken')
 
     def create(self, validated_data):
         user = YamdbUser.objects.get_or_create(**validated_data)
@@ -73,7 +73,7 @@ class UserSerializerAuth(serializers.Serializer, BaseUserSerializer):
         )
 
 
-class UserSerializerAdmin(serializers.ModelSerializer, BaseUserSerializer):
+class UserSerializerAdmin(serializers.ModelSerializer):
     class Meta:
         model = YamdbUser
         fields = (
