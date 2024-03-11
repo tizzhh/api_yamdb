@@ -81,7 +81,7 @@ class Review(models.Model):
         verbose_name='Пользователь',
     )
     score = models.PositiveSmallIntegerField(
-        default=1,
+        default=constants.MIN_SCORE_VALUE,
         validators=[
             MinValueValidator(
                 constants.MIN_SCORE_VALUE,
