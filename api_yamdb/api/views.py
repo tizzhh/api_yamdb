@@ -14,14 +14,17 @@ from rest_framework.mixins import (
 )
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import (
-    DjangoModelPermissionsOrAnonReadOnly,
     IsAuthenticated,
     IsAuthenticatedOrReadOnly,
 )
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from .permissions import IsAdminModerOrAuthorOrPostNew, IsAdminOrSuperUser
+from .permissions import (
+    IsAdminModerOrAuthor,
+    IsAdminOrSuperUser,
+    IsAdminOrSuperUserReadOnly,
+)
 from .serializers import (
     CategorySerializer,
     CommentSerializer,
@@ -115,7 +118,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
     permission_classes = (
         IsAuthenticatedOrReadOnly,
-        IsAdminModerOrAuthorOrPostNew,
+        IsAdminModerOrAuthor,
     )
     http_method_names = ['get', 'post', 'patch', 'delete']
 
@@ -135,7 +138,7 @@ class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
     permission_classes = (
         IsAuthenticatedOrReadOnly,
-        IsAdminModerOrAuthorOrPostNew,
+        IsAdminModerOrAuthor,
     )
     http_method_names = ['get', 'post', 'patch', 'delete']
 
@@ -159,9 +162,7 @@ class GenreViewSet(
 ):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
-    permission_classes = (
-        IsAdminOrSuperUser | DjangoModelPermissionsOrAnonReadOnly,
-    )
+    permission_classes = (IsAdminOrSuperUserReadOnly,)
     pagination_class = PageNumberPagination
     filter_backends = (filters.SearchFilter,)
     search_fields = ('=name',)
@@ -176,9 +177,7 @@ class CategoryViewSet(
 ):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
-    permission_classes = (
-        IsAdminOrSuperUser | DjangoModelPermissionsOrAnonReadOnly,
-    )
+    permission_classes = (IsAdminOrSuperUserReadOnly,)
     pagination_class = PageNumberPagination
     filter_backends = (filters.SearchFilter,)
     search_fields = ('=name',)
@@ -191,9 +190,7 @@ class TitleViewSet(viewsets.ModelViewSet):
     )
     serializer_class = TitleSerializer
     pagination_class = PageNumberPagination
-    permission_classes = (
-        IsAdminOrSuperUser | DjangoModelPermissionsOrAnonReadOnly,
-    )
+    permission_classes = (IsAdminOrSuperUserReadOnly,)
     http_method_names = ['get', 'post', 'patch', 'delete']
 
     def get_serializer_class(self):

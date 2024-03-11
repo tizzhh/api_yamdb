@@ -1,10 +1,11 @@
 import datetime as dt
 
+from django.contrib.auth import get_user_model
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.db.models import CheckConstraint, Q
 
-from yamdb_user.models import YamdbUser
+YamdbUser = get_user_model()
 
 
 class Title(models.Model):

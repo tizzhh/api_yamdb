@@ -1,28 +1,32 @@
 from rest_framework import permissions
 
-from yamdb_user.models import YamdbUser
-
 
 class IsAdminOrSuperUser(permissions.BasePermission):
     def has_permission(self, request, view):
-        print([role for role in YamdbUser.Roles.choices])
-        return request.user.is_superuser or (
-            request.user.is_authenticated
-            and request.user.role == YamdbUser.Roles.ADMIN
+        return request.user.is_authenticated and (
+            request.user.is_admin
+            or request.user.is_superuser
+            or request.user.is_staff
         )
 
 
-class IsAdminModerOrAuthorOrPostNew(permissions.IsAuthenticatedOrReadOnly):
+class IsAdminModerOrAuthor(permissions.IsAuthenticatedOrReadOnly):
     def has_object_permission(self, request, view, obj):
-        print([role for role in YamdbUser.Roles.choices])
         return (
             request.method in permissions.SAFE_METHODS
             or request.user.is_authenticated
             and (
-                view.action == 'create'
-                or request.user.is_superuser
-                or request.user.role == YamdbUser.Roles.ADMIN
-                or request.user.role == YamdbUser.Roles.MODERATOR
+                request.user.is_superuser
+                or request.user.is_admin
+                or request.user.is_moderator
                 or request.user == obj.author
             )
+        )
+
+
+class IsAdminOrSuperUserReadOnly(IsAdminOrSuperUser):
+    def has_permission(self, request, view):
+        return (
+            request.method in permissions.SAFE_METHODS
+            or super().has_permission(request, view)
         )

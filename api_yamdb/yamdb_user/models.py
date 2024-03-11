@@ -21,6 +21,14 @@ class YamdbUser(AbstractUser):
         default=Roles.USER,
     )
 
+    @property
+    def is_admin(self):
+        return self.role == self.Roles.ADMIN
+
+    @property
+    def is_moderator(self):
+        return self.role == self.Roles.MODERATOR
+
     class Meta:
         constraints = [
             CheckConstraint(
