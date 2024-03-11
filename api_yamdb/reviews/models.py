@@ -1,10 +1,14 @@
 import datetime as dt
 
+from django.contrib.auth import get_user_model
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.db.models import CheckConstraint, Q
 
-from custom_user.models import CustomUser
+from . import constants
+
+
+User = get_user_model()
 
 
 class Title(models.Model):
@@ -17,11 +21,13 @@ class Title(models.Model):
         verbose_name='Категория',
         null=True,
     )
-    genre = models.ManyToManyField('Genre', verbose_name='Жанры')
+    genre = models.ManyToManyField('Genre', verbose_name='Жанр')
 
     class Meta:
         default_related_name = 'titles'
-        ordering = ['name', 'year', 'category']
+        verbose_name = 'Произведение'
+        verbose_name_plural = 'Произведения'
+        ordering = ('name',)
 
         constraints = [
             CheckConstraint(
@@ -31,7 +37,7 @@ class Title(models.Model):
         ]
 
     def __str__(self):
-        return self.name
+        return self.name[:constants.OBJECT_NAME_DISPLAY_LENGTH]
 
 
 class Category(models.Model):
@@ -39,10 +45,12 @@ class Category(models.Model):
     slug = models.SlugField('Слаг', unique=True, max_length=50)
 
     class Meta:
-        ordering = ['name']
+        verbose_name = 'Категория'
+        verbose_name_plural = 'Категории'
+        ordering = ('name',)
 
     def __str__(self):
-        return self.name
+        return self.name[:constants.OBJECT_NAME_DISPLAY_LENGTH]
 
 
 class Genre(models.Model):
@@ -50,10 +58,12 @@ class Genre(models.Model):
     slug = models.SlugField('Слаг', unique=True, max_length=50)
 
     class Meta:
-        ordering = ['name']
+        verbose_name = 'Жанр'
+        verbose_name_plural = 'Жанры'
+        ordering = ('name',)
 
     def __str__(self):
-        return self.name
+        return self.name[:constants.OBJECT_NAME_DISPLAY_LENGTH]
 
 
 class Review(models.Model):
@@ -66,7 +76,7 @@ class Review(models.Model):
         verbose_name='Произведение',
     )
     author = models.ForeignKey(
-        CustomUser,
+        User,
         on_delete=models.CASCADE,
         verbose_name='Пользователь',
     )
@@ -94,7 +104,7 @@ class Review(models.Model):
         ordering = ('-pub_date',)
 
     def __str__(self):
-        return self.text[:]
+        return self.text[:constants.OBJECT_NAME_DISPLAY_LENGTH]
 
 
 class Comment(models.Model):
@@ -102,7 +112,7 @@ class Comment(models.Model):
 
     text = models.TextField('Текст комментария')
     author = models.ForeignKey(
-        CustomUser, on_delete=models.CASCADE, verbose_name='Пользователь'
+        User, on_delete=models.CASCADE, verbose_name='Пользователь'
     )
     pub_date = models.DateTimeField(
         auto_now_add=True, verbose_name='Дата публикации комментария'
@@ -118,4 +128,4 @@ class Comment(models.Model):
         ordering = ('-pub_date',)
 
     def __str__(self):
-        return self.text
+        return self.text[:constants.OBJECT_NAME_DISPLAY_LENGTH]
