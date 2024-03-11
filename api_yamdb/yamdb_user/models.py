@@ -5,9 +5,9 @@ from django.db.models import CheckConstraint, Q
 
 class YamdbUser(AbstractUser):
     class Roles(models.TextChoices):
-        user = 'user'
-        moderator = 'moderator'
-        admin = 'admin'
+        USER = 'user'
+        MODERATOR = 'moderator'
+        ADMIN = 'admin'
 
     confirmation_code = models.CharField(max_length=5, null=True, blank=True)
     email = models.EmailField(
@@ -15,7 +15,10 @@ class YamdbUser(AbstractUser):
     )
     bio = models.TextField('Биография', null=True, blank=True)
     role = models.CharField(
-        'Роль', choices=Roles.choices, max_length=9, default=Roles.user
+        'Роль',
+        choices=Roles.choices,
+        max_length=max(len(role[0]) for role in Roles.choices),
+        default=Roles.USER,
     )
 
     class Meta:
@@ -24,7 +27,7 @@ class YamdbUser(AbstractUser):
                 check=~Q(username='me'), name='username_me_banned_word'
             )
         ]
-        ordering = ('id',)
+        ordering = ('email',)
 
     def __str__(self) -> str:
         return self.username
