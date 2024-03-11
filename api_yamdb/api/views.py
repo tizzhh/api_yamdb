@@ -1,7 +1,7 @@
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from rest_framework import filters, status, viewsets
-from rest_framework.decorators import api_view
+from rest_framework.decorators import action, api_view
 from rest_framework.exceptions import NotFound
 from rest_framework.mixins import (
     CreateModelMixin,
@@ -14,7 +14,6 @@ from rest_framework.permissions import (
     IsAuthenticatedOrReadOnly,
 )
 from rest_framework.response import Response
-from rest_framework.views import APIView
 
 from .permissions import (
     IsAdminModerOrAuthor,
@@ -53,7 +52,7 @@ def get_custom_token(request):
 @api_view(['POST'])
 def user_view_set_auth(request):
     serializer = UserSerializerAuth(data=request.data)
-    serializer.is_valid(True)
+    serializer.is_valid(raise_exception=True)
     serializer.save()
 
     return Response(
@@ -69,7 +68,19 @@ class UserViewSetAdmin(viewsets.ModelViewSet):
     lookup_field = 'username'
     filter_backends = (filters.SearchFilter,)
     search_fields = ('username',)
-    pagination_class = PageNumberPagination
+
+    # @action(detail=True, methods=['get'], permission_classes=[IsAuthenticated])
+    # def retrieve_me(self, request):
+    #     # user = self.get_object()
+    #     serializer = UserSerializerReadPatch(data=request.data)
+    #     return Response(serializer.data)
+
+    # @action(detail=True, methods=['patch'], permission_classes=[IsAuthenticated])
+    # def retrieve_me(self, request):
+    #     serializer = UserSerializerReadPatch(data=request.data)
+    #     serializer.is_valid(raise_exception=True)
+    #     serializer.save()
+    #     return Response(serializer.data)
 
 
 class UserViewSetReadPatch(viewsets.ModelViewSet):
