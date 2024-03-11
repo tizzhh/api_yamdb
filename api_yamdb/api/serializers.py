@@ -1,31 +1,52 @@
 from django import forms
+from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.core.exceptions import BadRequest
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from rest_framework_simplejwt.serializers import TokenObtainSerializer
 
-from reviews.models import Category, Comment, Genre, Review, Title
-from yamdb_user.models import YamdbUser
+from reviews.models import Category, Comment, Genre, Review, Title, YamdbUser
 
 
-class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
+class CustomTokenObtainPairSerializer(TokenObtainSerializer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         del self.fields['password']
         self.fields['username'] = serializers.CharField()
         self.fields['confirmation_code'] = serializers.CharField()
 
+    def get_token(cls, user):
+        return super().get_token(user)
+
     def validate(self, attrs):
         username = attrs['username']
         confirmation_code = attrs['confirmation_code']
         user = get_object_or_404(YamdbUser, username=username)
         if confirmation_code != user.confirmation_code:
-            raise BadRequest('Incorrect confirmation code')
+            raise forms.ValidationError('Incorrect confirmation code')
         attrs['USER'] = user
         return attrs
 
 
-class BaseUserSerializer(serializers.ModelSerializer):
+# class BaseUserSerializer(serializers.ModelSerializer):
+class BaseUserSerializer:
+    # class Meta:
+    #     model = YamdbUser
+    #     fields = (
+    #         'username',
+    #         'email',
+    #     )
+
+    def validate_username(self, value):
+        if value == 'me':
+            raise forms.ValidationError('Username cannot be "me"')
+        return value
+
+
+class UserSerializerAuth(serializers.ModelSerializer):
+    # username = serializers.CharField(max_length=150, validators=[UnicodeUsernameValidator()])
+    # email = serializers.EmailField(max_length=254)
+
     class Meta:
         model = YamdbUser
         fields = (
@@ -38,17 +59,18 @@ class BaseUserSerializer(serializers.ModelSerializer):
             raise forms.ValidationError('Username cannot be "me"')
         return value
 
+    # def create(self, validated_data):
+    #     return YamdbUser.objects.create(**validated_data)
+    # def validate_username(self, value):
+    #     if value == 'me':
+    #         raise forms.ValidationError('Username cannot be "me"')
+    #     return value
 
-class UserSerializerAuth(BaseUserSerializer):
-    ...
 
-
-class UserSerializerAdmin(BaseUserSerializer):
-    class Meta:
-        model = YamdbUser
-        fields = (
-            'username',
-            'email',
+class UserSerializerAdmin(UserSerializerAuth):
+    class Meta(UserSerializerAuth.Meta):
+        # model = YamdbUser
+        fields = UserSerializerAuth.Meta.fields + (
             'first_name',
             'last_name',
             'bio',
@@ -56,17 +78,8 @@ class UserSerializerAdmin(BaseUserSerializer):
         )
 
 
-class UserSerializerReadPatch(BaseUserSerializer):
-    class Meta:
-        model = YamdbUser
-        fields = (
-            'username',
-            'email',
-            'first_name',
-            'last_name',
-            'bio',
-            'role',
-        )
+class UserSerializerReadPatch(UserSerializerAdmin):
+    class Meta(UserSerializerAdmin.Meta):
         read_only_fields = ('role',)
 
 

@@ -9,6 +9,7 @@ class YamdbUser(AbstractUser):
         MODERATOR = 'moderator'
         ADMIN = 'admin'
 
+    password = None
     confirmation_code = models.CharField(max_length=5, null=True, blank=True)
     email = models.EmailField(
         unique=True, max_length=254, null=False, blank=False

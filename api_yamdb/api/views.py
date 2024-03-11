@@ -1,5 +1,6 @@
 from random import randint
 
+from django import forms
 from django.core.exceptions import BadRequest
 from django.core.mail import send_mail
 from django.db.models import Avg
@@ -18,7 +19,6 @@ from rest_framework.permissions import (
     IsAuthenticatedOrReadOnly,
 )
 from rest_framework.response import Response
-from rest_framework_simplejwt.tokens import RefreshToken
 
 from .permissions import (
     IsAdminModerOrAuthor,
@@ -44,16 +44,14 @@ from yamdb_user.models import YamdbUser
 @api_view(['POST'])
 def get_custom_token(request):
     serializer = CustomTokenObtainPairSerializer(data=request.data)
-    if serializer.is_valid():
-        refresh = RefreshToken.for_user(serializer.validated_data['USER'])
-        return Response(
-            {
-                'refresh': str(refresh),
-                'access': str(refresh.access_token),
-            },
-            status=status.HTTP_200_OK,
-        )
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    serializer.is_valid(True)
+    refresh = serializer.get_token()
+    return Response(
+        {
+            'access': str(refresh.access_token),
+        },
+        status=status.HTTP_200_OK,
+    )
 
 
 class UserViewSetAuth(viewsets.ModelViewSet):
@@ -69,7 +67,7 @@ class UserViewSetAuth(viewsets.ModelViewSet):
 
         if user and user[0].email != request.data.get('email'):
             raise BadRequest('Incorrect email')
-
+        default_token_generator.make_token(user)
         confirmation_code = randint(10000, 99999)
         self.send_confirmation_code_email(request.data, confirmation_code)
 
