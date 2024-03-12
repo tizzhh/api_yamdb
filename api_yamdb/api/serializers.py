@@ -108,26 +108,16 @@ class ReviewSerializer(serializers.ModelSerializer):
     def validate(self, data):
         """Checks user can create only one review for one title."""
         request = self.context['request']
-        title_id = self.context['view'].kwargs['title_id']
-        title = get_object_or_404(Title, pk=title_id)
-        if (
-            request.method == 'POST'
-            and Review.objects.filter(
-                author=request.user, title=title
-            ).exists()
-        ):
+        if request.method != 'POST':
+            return data
+        if Review.objects.filter(
+            author=request.user,
+            title__id=self.context['view'].kwargs['title_id'],
+        ).exists():
             raise serializers.ValidationError(
                 'Можно оставить только один отзыв к произведению.'
             )
         return data
-
-    def validate_score(self, value):
-        """Checks validity of rating value."""
-        if 1 > value > 10:
-            raise serializers.ValidationError(
-                'Допустимые значения оценки: от 1 до 10.'
-            )
-        return value
 
 
 class CommentSerializer(serializers.ModelSerializer):

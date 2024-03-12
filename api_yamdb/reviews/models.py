@@ -5,6 +5,8 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.db.models import CheckConstraint, Q
 
+from . import constants
+
 YamdbUser = get_user_model()
 
 
@@ -18,11 +20,13 @@ class Title(models.Model):
         verbose_name='Категория',
         null=True,
     )
-    genre = models.ManyToManyField('Genre', verbose_name='Жанры')
+    genre = models.ManyToManyField('Genre', verbose_name='Жанр')
 
     class Meta:
         default_related_name = 'titles'
-        ordering = ['name', 'year', 'category']
+        verbose_name = 'Произведение'
+        verbose_name_plural = 'Произведения'
+        ordering = ('name',)
 
         constraints = [
             CheckConstraint(
@@ -32,7 +36,7 @@ class Title(models.Model):
         ]
 
     def __str__(self):
-        return self.name
+        return self.name[: constants.OBJECT_NAME_DISPLAY_LENGTH]
 
 
 class Category(models.Model):
@@ -40,10 +44,12 @@ class Category(models.Model):
     slug = models.SlugField('Слаг', unique=True, max_length=50)
 
     class Meta:
-        ordering = ['name']
+        verbose_name = 'Категория'
+        verbose_name_plural = 'Категории'
+        ordering = ('name',)
 
     def __str__(self):
-        return self.name
+        return self.name[: constants.OBJECT_NAME_DISPLAY_LENGTH]
 
 
 class Genre(models.Model):
@@ -51,10 +57,12 @@ class Genre(models.Model):
     slug = models.SlugField('Слаг', unique=True, max_length=50)
 
     class Meta:
-        ordering = ['name']
+        verbose_name = 'Жанр'
+        verbose_name_plural = 'Жанры'
+        ordering = ('name',)
 
     def __str__(self):
-        return self.name
+        return self.name[: constants.OBJECT_NAME_DISPLAY_LENGTH]
 
 
 class Review(models.Model):
@@ -72,10 +80,14 @@ class Review(models.Model):
         verbose_name='Пользователь',
     )
     score = models.PositiveSmallIntegerField(
-        default=1,
+        default=constants.MIN_SCORE_VALUE,
         validators=[
-            MinValueValidator(1, 'Оценка не может быть ниже 1.'),
-            MaxValueValidator(10, 'Оценка не может быть выше 10.'),
+            MinValueValidator(
+                constants.MIN_SCORE_VALUE, 'Оценка не может быть ниже 1.'
+            ),
+            MaxValueValidator(
+                constants.MAX_SCORE_VALUE, 'Оценка не может быть выше 10.'
+            ),
         ],
         verbose_name='Оценка',
     )
@@ -95,7 +107,7 @@ class Review(models.Model):
         ordering = ('-pub_date',)
 
     def __str__(self):
-        return self.text[:]
+        return self.text[: constants.OBJECT_NAME_DISPLAY_LENGTH]
 
 
 class Comment(models.Model):
@@ -119,4 +131,4 @@ class Comment(models.Model):
         ordering = ('-pub_date',)
 
     def __str__(self):
-        return self.text
+        return self.text[: constants.OBJECT_NAME_DISPLAY_LENGTH]
