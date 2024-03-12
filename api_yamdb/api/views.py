@@ -8,12 +8,16 @@ from rest_framework.mixins import (
     DestroyModelMixin,
     ListModelMixin,
 )
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import (
     IsAuthenticated,
     IsAuthenticatedOrReadOnly,
 )
 from rest_framework.response import Response
+from rest_framework_simplejwt.tokens import RefreshToken
+from .filters import TitleFilter
+
 
 from .permissions import (
     IsAdminModerOrAuthor,
@@ -27,7 +31,7 @@ from .serializers import (
     GenreSerializer,
     ReviewSerializer,
     TitleCreateSerializer,
-    TitleSerializer,
+    TitleReadSerializer,
     UserSerializerAdmin,
     UserSerializerAuth,
     UserSerializerReadPatch,
@@ -124,7 +128,7 @@ class CommentViewSet(viewsets.ModelViewSet):
         IsAuthenticatedOrReadOnly,
         IsAdminModerOrAuthor,
     )
-    http_method_names = ['get', 'post', 'patch', 'delete']
+    http_method_names = ('get', 'post', 'patch', 'delete')
 
     def get_review(self):
         return get_object_or_404(
@@ -142,84 +146,41 @@ class CommentViewSet(viewsets.ModelViewSet):
         return self.get_review().comments.all()
 
 
-class GenreViewSet(
+class CategoryGenreBaseViewSet(
     ListModelMixin,
     CreateModelMixin,
     DestroyModelMixin,
-    viewsets.GenericViewSet,
+    viewsets.GenericViewSet
 ):
+    permission_classes = (IsAdminOrSuperUserReadOnly,)
+    pagination_class = PageNumberPagination
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('=name',)
+    lookup_field = 'slug'
+
+
+class GenreViewSet(CategoryGenreBaseViewSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
-    permission_classes = (IsAdminOrSuperUserReadOnly,)
-    pagination_class = PageNumberPagination
-    filter_backends = (filters.SearchFilter,)
-    search_fields = ('=name',)
-    lookup_field = 'slug'
 
 
-class CategoryViewSet(
-    ListModelMixin,
-    CreateModelMixin,
-    DestroyModelMixin,
-    viewsets.GenericViewSet,
-):
+class CategoryViewSet(CategoryGenreBaseViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
-    permission_classes = (IsAdminOrSuperUserReadOnly,)
-    pagination_class = PageNumberPagination
-    filter_backends = (filters.SearchFilter,)
-    search_fields = ('=name',)
-    lookup_field = 'slug'
 
 
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.annotate(rating=Avg('reviews__score')).order_by(
         'name', '-year'
     )
-    serializer_class = TitleSerializer
+    serializer_class = TitleReadSerializer
     pagination_class = PageNumberPagination
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = TitleFilter
+    http_method_names = ('get', 'post', 'patch', 'delete')
     permission_classes = (IsAdminOrSuperUserReadOnly,)
-    http_method_names = ['get', 'post', 'patch', 'delete']
 
     def get_serializer_class(self):
-        if self.action in ['list', 'retrieve']:
-            return TitleSerializer
-        elif self.action in ['create', 'patch']:
+        if self.action in ['create', 'partial_update']:
             return TitleCreateSerializer
-        return TitleSerializer
-
-    def get_queryset(self):
-        queryset = super().get_queryset()
-        genre_slug = self.request.query_params.get('genre')
-        category_slug = self.request.query_params.get('category')
-        year = self.request.query_params.get('year')
-        name = self.request.query_params.get('name')
-        if genre_slug:
-            queryset = queryset.filter(genre__slug=genre_slug)
-        if category_slug:
-            queryset = queryset.filter(category__slug=category_slug)
-        if year:
-            queryset = queryset.filter(year=year)
-        if name:
-            queryset = queryset.filter(name=name)
-        return queryset
-
-    def partial_update(self, request, *args, **kwargs):
-        instance = self.get_object()
-        serializer = self.get_serializer(
-            instance, data=request.data, partial=True
-        )
-        serializer.is_valid(raise_exception=True)
-
-        if 'category' in request.data:
-            category_slug = request.data['category']
-            try:
-                category_instance = Category.objects.get(slug=category_slug)
-            except Category.DoesNotExist:
-                raise NotFound(
-                    f"Category with slug '{category_slug}' does not exist"
-                )
-            instance.category = category_instance
-
-        self.perform_update(serializer)
-        return Response(serializer.data)
+        return TitleReadSerializer
