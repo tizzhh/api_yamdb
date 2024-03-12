@@ -64,7 +64,7 @@ class UserViewSetAdmin(viewsets.ModelViewSet):
     queryset = YamdbUser.objects.all()
     serializer_class = UserSerializerAdmin
     permission_classes = (IsAdminOrSuperUser,)
-    lookup_field = "username"
+    lookup_field = 'username'
     filter_backends = (filters.SearchFilter,)
     search_fields = ('username',)
     http_method_names = (

@@ -8,6 +8,7 @@ from rest_framework_simplejwt.serializers import TokenObtainSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from reviews.models import Category, Comment, Genre, Review, Title, YamdbUser
+from yamdb_user.models import EMAIL_MAX_LENGTH, USERNAME_MAX_LENGTH
 
 
 class CustomTokenObtainPairSerializer(TokenObtainSerializer):
@@ -39,9 +40,9 @@ class BaseUserSerializer:
 
 class UserSerializerAuth(serializers.Serializer, BaseUserSerializer):
     username = serializers.CharField(
-        max_length=150, validators=[UnicodeUsernameValidator()]
+        max_length=USERNAME_MAX_LENGTH, validators=[UnicodeUsernameValidator()]
     )
-    email = serializers.EmailField(max_length=254)
+    email = serializers.EmailField(max_length=EMAIL_MAX_LENGTH)
 
     def validate(self, attrs):
         username = attrs.get('username')

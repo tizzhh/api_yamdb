@@ -2,6 +2,9 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.db.models import CheckConstraint, Q
 
+USERNAME_MAX_LENGTH = 150
+EMAIL_MAX_LENGTH = 254
+
 
 class YamdbUser(AbstractUser):
     class Roles(models.TextChoices):
@@ -10,7 +13,7 @@ class YamdbUser(AbstractUser):
         ADMIN = 'admin'
 
     email = models.EmailField(
-        unique=True, max_length=254, null=False, blank=False
+        unique=True, max_length=EMAIL_MAX_LENGTH, null=False, blank=False
     )
     bio = models.TextField('Биография', blank=True)
     role = models.CharField(
