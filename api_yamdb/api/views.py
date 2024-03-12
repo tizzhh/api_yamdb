@@ -21,7 +21,7 @@ from rest_framework.permissions import (
 )
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
-from django_filters import FilterSet, CharFilter, NumberFilter
+from .filters import TitleFilter
 
 from .permissions import IsAdminModerOrAuthorOrPostNew, IsAdminOrSuperUser
 from .serializers import (
@@ -38,17 +38,6 @@ from .serializers import (
 )
 from custom_user.models import CustomUser
 from reviews.models import Category, Genre, Review, Title
-
-
-class TitleFilter(FilterSet):
-    genre = CharFilter(field_name='genre__slug')
-    category = CharFilter(field_name='category__slug')
-    year = NumberFilter(field_name='year')
-    name = CharFilter(field_name='name')
-
-    class Meta:
-        model = Title
-        fields = ['genre', 'category', 'year', 'name']
 
 
 @api_view(['POST'])
@@ -196,7 +185,7 @@ class TitleViewSet(viewsets.ModelViewSet):
     serializer_class = TitleReadSerializer
     pagination_class = PageNumberPagination
     permission_classes = (
-       IsAdminOrSuperUser | DjangoModelPermissionsOrAnonReadOnly,
+        IsAdminOrSuperUser | DjangoModelPermissionsOrAnonReadOnly,
     )
     filter_backends = (DjangoFilterBackend,)
     filterset_class = TitleFilter

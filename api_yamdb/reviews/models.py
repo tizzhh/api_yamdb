@@ -4,7 +4,8 @@ from django.utils import timezone
 from django.core.exceptions import ValidationError
 
 from custom_user.models import CustomUser
-from .constants import NAME_MAX_LENGTH, SLUG_MAX_LENGTH
+from .constants import (NAME_MAX_LENGTH, SLUG_MAX_LENGTH,
+                        OBJECT_NAME_DISPLAY_LENGTH)
 
 
 class CategoryGenreAbstract(models.Model):
@@ -16,7 +17,7 @@ class CategoryGenreAbstract(models.Model):
         ordering = ('name',)
 
     def __str__(self):
-        return self.name
+        return self.name[:OBJECT_NAME_DISPLAY_LENGTH]
 
 
 class Title(models.Model):
@@ -35,15 +36,14 @@ class Title(models.Model):
         default_related_name = 'titles'
         ordering = ('name', 'year', 'category')
 
-    def clean(self) -> None:
-        super().clean()
+    def validate(self) -> None:
         current_year = timezone.now().year
         if self.year > current_year:
             raise ValidationError({'year': 'Год публикации не может быть'
                                    'больше текущего'})
 
     def __str__(self):
-        return self.name
+        return self.name[:OBJECT_NAME_DISPLAY_LENGTH]
 
 
 class Category(CategoryGenreAbstract):
