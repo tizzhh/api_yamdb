@@ -164,8 +164,11 @@ class TitleReadSerializer(serializers.ModelSerializer):
 
 class TitleCreateSerializer(serializers.ModelSerializer):
     genre = serializers.SlugRelatedField(
-        slug_field='slug', queryset=Genre.objects.all(), many=True,
-        allow_null=False, allow_empty=False
+        slug_field='slug',
+        queryset=Genre.objects.all(),
+        many=True,
+        allow_null=False,
+        allow_empty=False,
     )
     category = serializers.SlugRelatedField(
         slug_field='slug', queryset=Category.objects.all()

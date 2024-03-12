@@ -1,5 +1,6 @@
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, status, viewsets
 from rest_framework.decorators import action, api_view
 from rest_framework.exceptions import NotFound
@@ -8,7 +9,6 @@ from rest_framework.mixins import (
     DestroyModelMixin,
     ListModelMixin,
 )
-from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import (
     IsAuthenticated,
@@ -16,9 +16,8 @@ from rest_framework.permissions import (
 )
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
+
 from .filters import TitleFilter
-
-
 from .permissions import (
     IsAdminModerOrAuthor,
     IsAdminOrSuperUser,
@@ -150,7 +149,7 @@ class CategoryGenreBaseViewSet(
     ListModelMixin,
     CreateModelMixin,
     DestroyModelMixin,
-    viewsets.GenericViewSet
+    viewsets.GenericViewSet,
 ):
     permission_classes = (IsAdminOrSuperUserReadOnly,)
     pagination_class = PageNumberPagination
