@@ -192,26 +192,6 @@ class TitleViewSet(viewsets.ModelViewSet):
     http_method_names = ('get', 'post', 'patch', 'delete')
 
     def get_serializer_class(self):
-        if self.action in ['create', 'patch']:
+        if self.action in ['create', 'partial_update']:
             return TitleCreateSerializer
         return TitleReadSerializer
-
-    def partial_update(self, request, *args, **kwargs):  # я в общем вообще
-        instance = self.get_object()                     # без понятия как
-        serializer = self.get_serializer(
-            instance, data=request.data, partial=True
-        )
-        serializer.is_valid(raise_exception=True)
-
-        if 'category' in request.data:
-            category_slug = request.data['category']
-            try:
-                category_instance = Category.objects.get(slug=category_slug)
-            except Category.DoesNotExist:
-                raise NotFound(
-                    f"Category with slug '{category_slug}' does not exist"
-                )
-            instance.category = category_instance
-
-        self.perform_update(serializer)
-        return Response(serializer.data)
