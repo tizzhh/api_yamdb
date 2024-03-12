@@ -7,8 +7,7 @@ from django.db.models import CheckConstraint, Q
 
 from . import constants
 
-
-User = get_user_model()
+YamdbUser = get_user_model()
 
 
 class Title(models.Model):
@@ -37,7 +36,7 @@ class Title(models.Model):
         ]
 
     def __str__(self):
-        return self.name[:constants.OBJECT_NAME_DISPLAY_LENGTH]
+        return self.name[: constants.OBJECT_NAME_DISPLAY_LENGTH]
 
 
 class Category(models.Model):
@@ -50,7 +49,7 @@ class Category(models.Model):
         ordering = ('name',)
 
     def __str__(self):
-        return self.name[:constants.OBJECT_NAME_DISPLAY_LENGTH]
+        return self.name[: constants.OBJECT_NAME_DISPLAY_LENGTH]
 
 
 class Genre(models.Model):
@@ -63,7 +62,7 @@ class Genre(models.Model):
         ordering = ('name',)
 
     def __str__(self):
-        return self.name[:constants.OBJECT_NAME_DISPLAY_LENGTH]
+        return self.name[: constants.OBJECT_NAME_DISPLAY_LENGTH]
 
 
 class Review(models.Model):
@@ -76,7 +75,7 @@ class Review(models.Model):
         verbose_name='Произведение',
     )
     author = models.ForeignKey(
-        User,
+        YamdbUser,
         on_delete=models.CASCADE,
         verbose_name='Пользователь',
     )
@@ -84,12 +83,10 @@ class Review(models.Model):
         default=constants.MIN_SCORE_VALUE,
         validators=[
             MinValueValidator(
-                constants.MIN_SCORE_VALUE,
-                'Оценка не может быть ниже 1.'
+                constants.MIN_SCORE_VALUE, 'Оценка не может быть ниже 1.'
             ),
             MaxValueValidator(
-                constants.MAX_SCORE_VALUE,
-                'Оценка не может быть выше 10.'
+                constants.MAX_SCORE_VALUE, 'Оценка не может быть выше 10.'
             ),
         ],
         verbose_name='Оценка',
@@ -110,7 +107,7 @@ class Review(models.Model):
         ordering = ('-pub_date',)
 
     def __str__(self):
-        return self.text[:constants.OBJECT_NAME_DISPLAY_LENGTH]
+        return self.text[: constants.OBJECT_NAME_DISPLAY_LENGTH]
 
 
 class Comment(models.Model):
@@ -118,7 +115,7 @@ class Comment(models.Model):
 
     text = models.TextField('Текст комментария')
     author = models.ForeignKey(
-        User, on_delete=models.CASCADE, verbose_name='Пользователь'
+        YamdbUser, on_delete=models.CASCADE, verbose_name='Пользователь'
     )
     pub_date = models.DateTimeField(
         auto_now_add=True, verbose_name='Дата публикации комментария'
@@ -134,4 +131,4 @@ class Comment(models.Model):
         ordering = ('-pub_date',)
 
     def __str__(self):
-        return self.text[:constants.OBJECT_NAME_DISPLAY_LENGTH]
+        return self.text[: constants.OBJECT_NAME_DISPLAY_LENGTH]

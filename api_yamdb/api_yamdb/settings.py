@@ -21,10 +21,10 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-    'django_filters',
+    'yamdb_user.apps.YamdbUserConfig',
     'api.apps.ApiConfig',
     'reviews.apps.ReviewsConfig',
-    'custom_user.apps.CustomUserConfig',
+    'django_filters',
 ]
 
 MIDDLEWARE = [
@@ -77,7 +77,7 @@ REST_FRAMEWORK = {
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ],
     'PAGE_SIZE': 10,
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
 }
 
 SIMPLE_JWT = {
@@ -121,8 +121,10 @@ STATIC_URL = '/static/'
 
 STATICFILES_DIRS = ((BASE_DIR / 'static/'),)
 
-AUTH_USER_MODEL = 'custom_user.CustomUser'
+AUTH_USER_MODEL = 'yamdb_user.YamdbUser'
 
 EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
+
+YAMBD_EMAIL = 'yamdb@yamdb.net'
 
 EMAIL_FILE_PATH = BASE_DIR / 'sent_emails'
