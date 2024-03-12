@@ -117,7 +117,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
         IsAuthenticatedOrReadOnly,
         IsAdminModerOrAuthorOrPostNew,
     )
-    http_method_names = ['get', 'post', 'patch', 'delete']
+    http_method_names = ('get', 'post', 'patch', 'delete')
 
     def get_title(self):
         return get_object_or_404(Title, pk=self.kwargs['title_id'])
@@ -140,7 +140,11 @@ class CommentViewSet(viewsets.ModelViewSet):
     http_method_names = ['get', 'post', 'patch', 'delete']
 
     def get_review(self):
-        return get_object_or_404(Review, pk=self.kwargs['review_id'])
+        return get_object_or_404(
+            Review,
+            pk=self.kwargs['review_id'],
+            title__id=self.kwargs['title_id']
+        )
 
     def perform_create(self, serializer):
         return serializer.save(
@@ -187,7 +191,7 @@ class CategoryViewSet(
 
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.annotate(rating=Avg('reviews__score')).order_by(
-        'id'
+        'name', '-year'
     )
     serializer_class = TitleSerializer
     pagination_class = PageNumberPagination
