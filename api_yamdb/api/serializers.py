@@ -43,12 +43,18 @@ class UserSerializerAuth(serializers.Serializer, BaseUserValidator):
     def validate(self, attrs):
         username = attrs.get('username')
         email = attrs.get('email')
+        errors = {}
+        email_exists = YamdbUser.objects.filter(email=email).exists()
+        username_exists = YamdbUser.objects.filter(username=username).exists()
         if (
-            not YamdbUser.objects.filter(email=email).exists()
-            and not YamdbUser.objects.filter(username=username).exists()
+            not email_exists and not username_exists
         ) or YamdbUser.objects.filter(email=email, username=username).exists():
             return attrs
-        raise serializers.ValidationError('Email/username already taken')
+        if email_exists:
+            errors['email'] = 'Email already exists'
+        if username_exists:
+            errors['username'] = 'Username already exists'
+        raise serializers.ValidationError(errors)
 
     def create(self, validated_data):
         user = YamdbUser.objects.get_or_create(**validated_data)
