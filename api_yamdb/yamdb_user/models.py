@@ -1,14 +1,27 @@
+import re
+
 from django.contrib.auth.models import AbstractUser
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import CheckConstraint, Q
-
-from api.serializers import BaseUserSerializer
 
 USERNAME_MAX_LENGTH = 150
 EMAIL_MAX_LENGTH = 254
 
 
-class YamdbUser(AbstractUser, BaseUserSerializer):
+# переместил сюда из-за циклического импорта
+class BaseUserValidator:
+    def validate_username(self, value):
+        if value == 'me':
+            raise ValidationError('Username cannot be "me"')
+        if banned_symbols := re.sub(r'[\w.@+-]+', '', value):
+            raise ValidationError(
+                f'Prohibited username symbols: \'{banned_symbols}\''
+            )
+        return value
+
+
+class YamdbUser(AbstractUser, BaseUserValidator):
     class Roles(models.TextChoices):
         USER = 'user'
         MODERATOR = 'moderator'

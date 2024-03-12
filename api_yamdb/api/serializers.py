@@ -1,5 +1,3 @@
-import re
-
 from django.conf import settings
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
@@ -9,7 +7,11 @@ from rest_framework_simplejwt.serializers import TokenObtainSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from reviews.models import Category, Comment, Genre, Review, Title, YamdbUser
-from yamdb_user.models import EMAIL_MAX_LENGTH, USERNAME_MAX_LENGTH
+from yamdb_user.models import (
+    EMAIL_MAX_LENGTH,
+    USERNAME_MAX_LENGTH,
+    BaseUserValidator,
+)
 
 
 class CustomTokenObtainPairSerializer(TokenObtainSerializer):
@@ -32,18 +34,7 @@ class CustomTokenObtainPairSerializer(TokenObtainSerializer):
         return attrs
 
 
-class BaseUserSerializer:
-    def validate_username(self, value):
-        if value == 'me':
-            raise serializers.ValidationError('Username cannot be "me"')
-        if banned_symbols := re.sub(r'[\w.@+-]+', '', value):
-            raise serializers.ValidationError(
-                f'Prohibited username symbols: \'{banned_symbols}\''
-            )
-        return value
-
-
-class UserSerializerAuth(serializers.Serializer, BaseUserSerializer):
+class UserSerializerAuth(serializers.Serializer, BaseUserValidator):
     username = serializers.CharField(
         max_length=USERNAME_MAX_LENGTH,
     )
@@ -79,7 +70,7 @@ class UserSerializerAuth(serializers.Serializer, BaseUserSerializer):
         )
 
 
-class UserSerializerAdmin(serializers.ModelSerializer, BaseUserSerializer):
+class UserSerializerAdmin(serializers.ModelSerializer, BaseUserValidator):
     class Meta:
         model = YamdbUser
         fields = (
