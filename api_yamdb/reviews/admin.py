@@ -1,14 +1,14 @@
 from django.contrib import admin
 
 from .constants import OBJECT_PER_ADMIN_PAGE
-from .models import Category, Comment, Genre, Review, Title, User
+from .models import Category, Comment, Genre, Review, Title, YamdbUser
 
 admin.site.empty_value_display = 'нет данных'
 admin.site.site_title = 'Админ-зона проекта YAMDB'
 admin.site.site_header = 'Админ-зона проекта YAMDB'
 
 
-@admin.register(User)
+@admin.register(YamdbUser)
 class UserAdmin(admin.ModelAdmin):
     list_display = (
         'id',
