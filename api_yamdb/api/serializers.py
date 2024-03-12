@@ -1,6 +1,7 @@
+import re
+
 from django.conf import settings
 from django.contrib.auth.tokens import default_token_generator
-from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
@@ -35,12 +36,16 @@ class BaseUserSerializer:
     def validate_username(self, value):
         if value == 'me':
             raise serializers.ValidationError('Username cannot be "me"')
+        if banned_symbols := re.sub(r'[\w.@+-]+', '', value):
+            raise serializers.ValidationError(
+                f'Prohibited username symbols: \'{banned_symbols}\''
+            )
         return value
 
 
 class UserSerializerAuth(serializers.Serializer, BaseUserSerializer):
     username = serializers.CharField(
-        max_length=USERNAME_MAX_LENGTH, validators=[UnicodeUsernameValidator()]
+        max_length=USERNAME_MAX_LENGTH,
     )
     email = serializers.EmailField(max_length=EMAIL_MAX_LENGTH)
 
@@ -74,7 +79,7 @@ class UserSerializerAuth(serializers.Serializer, BaseUserSerializer):
         )
 
 
-class UserSerializerAdmin(serializers.ModelSerializer):
+class UserSerializerAdmin(serializers.ModelSerializer, BaseUserSerializer):
     class Meta:
         model = YamdbUser
         fields = (

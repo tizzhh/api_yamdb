@@ -2,11 +2,13 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.db.models import CheckConstraint, Q
 
+from api.serializers import BaseUserSerializer
+
 USERNAME_MAX_LENGTH = 150
 EMAIL_MAX_LENGTH = 254
 
 
-class YamdbUser(AbstractUser):
+class YamdbUser(AbstractUser, BaseUserSerializer):
     class Roles(models.TextChoices):
         USER = 'user'
         MODERATOR = 'moderator'
