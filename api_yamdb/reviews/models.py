@@ -29,7 +29,8 @@ class Title(models.Model):
         'Наименование', max_length=constants.NAME_MAX_LENGTH
     )
     year = models.PositiveSmallIntegerField(
-        'Год публикации', validators=[validate_year])
+        'Год публикации', validators=[validate_year]
+    )
     description = models.TextField('Описание', blank=True, default='')
     category = models.ForeignKey(
         'Category',
@@ -50,14 +51,12 @@ class Title(models.Model):
 
 
 class Category(CategoryGenreAbstract):
-
     class Meta(CategoryGenreAbstract.Meta):
         verbose_name = 'Категория'
         verbose_name_plural = 'Категории'
 
 
 class Genre(CategoryGenreAbstract):
-
     class Meta(CategoryGenreAbstract.Meta):
         verbose_name = 'Жанр'
         verbose_name_plural = 'Жанры'

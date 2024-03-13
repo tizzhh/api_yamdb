@@ -4,7 +4,6 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('reviews', '0003_alter_title_year'),
     ]
@@ -12,14 +11,27 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AlterModelOptions(
             name='category',
-            options={'ordering': ('name',), 'verbose_name': 'Категория', 'verbose_name_plural': 'Категории'},
+            options={
+                'ordering': ('name',),
+                'verbose_name': 'Категория',
+                'verbose_name_plural': 'Категории',
+            },
         ),
         migrations.AlterModelOptions(
             name='genre',
-            options={'ordering': ('name',), 'verbose_name': 'Жанр', 'verbose_name_plural': 'Жанры'},
+            options={
+                'ordering': ('name',),
+                'verbose_name': 'Жанр',
+                'verbose_name_plural': 'Жанры',
+            },
         ),
         migrations.AlterModelOptions(
             name='title',
-            options={'default_related_name': 'titles', 'ordering': ('name',), 'verbose_name': 'Произведение', 'verbose_name_plural': 'Произведения'},
+            options={
+                'default_related_name': 'titles',
+                'ordering': ('name',),
+                'verbose_name': 'Произведение',
+                'verbose_name_plural': 'Произведения',
+            },
         ),
     ]
