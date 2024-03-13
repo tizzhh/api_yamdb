@@ -12,8 +12,21 @@ TABLE_DATA = {
     'data/users.csv': 'yamdb_user_yamdbuser',
 }
 
+# не нашел и не придумал, как нормально импортировать
+# с учетом того, что названия столбцов не совпадают,
+# поэтому переименовал.
 with sqlite3.connect('../db.sqlite3') as conn:
     for csv_path, table_name in TABLE_DATA.items():
         df = pd.read_csv(csv_path)
         df.columns = df.columns.str.strip()
-        df.to_sql(table_name, conn)
+        df = df.fillna('')
+        cursor = conn.execute(f'SELECT * FROM {table_name}')
+        if missing_cols := (
+            set(descr[0] for descr in cursor.description) - set(df.columns)
+        ):
+            for col_name in missing_cols:
+                df.insert(len(df.columns), col_name, "")
+        try:
+            df.to_sql(table_name, conn, if_exists='append', index=False)
+        except sqlite3.IntegrityError as e:
+            continue
