@@ -1,10 +1,9 @@
 from django.contrib.auth import get_user_model
-from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
-from django.utils import timezone
 
-from reviews import constants
+from . import constants
+from .validators import validate_year
 
 YamdbUser = get_user_model()
 
@@ -29,7 +28,8 @@ class Title(models.Model):
     name = models.CharField(
         'Наименование', max_length=constants.NAME_MAX_LENGTH
     )
-    year = models.PositiveSmallIntegerField('Год публикации')
+    year = models.PositiveSmallIntegerField(
+        'Год публикации', validators=[validate_year])
     description = models.TextField('Описание', blank=True, default='')
     category = models.ForeignKey(
         'Category',
@@ -41,25 +41,26 @@ class Title(models.Model):
 
     class Meta:
         default_related_name = 'titles'
-        ordering = ('name', 'year', 'category')
-
-    def validate(self) -> None:
-        current_year = timezone.now().year
-        if self.year > current_year:
-            raise ValidationError(
-                {'year': 'Год публикации не может быть' 'больше текущего'}
-            )
+        verbose_name = 'Произведение'
+        verbose_name_plural = 'Произведения'
+        ordering = ('name',)
 
     def __str__(self):
         return self.name[: constants.OBJECT_NAME_DISPLAY_LENGTH]
 
 
 class Category(CategoryGenreAbstract):
-    pass
+
+    class Meta(CategoryGenreAbstract.Meta):
+        verbose_name = 'Категория'
+        verbose_name_plural = 'Категории'
 
 
 class Genre(CategoryGenreAbstract):
-    pass
+
+    class Meta(CategoryGenreAbstract.Meta):
+        verbose_name = 'Жанр'
+        verbose_name_plural = 'Жанры'
 
 
 class Review(models.Model):
@@ -77,7 +78,6 @@ class Review(models.Model):
         verbose_name='Пользователь',
     )
     score = models.PositiveSmallIntegerField(
-        default=constants.MIN_SCORE_VALUE,
         validators=[
             MinValueValidator(
                 constants.MIN_SCORE_VALUE, 'Оценка не может быть ниже 1.'
