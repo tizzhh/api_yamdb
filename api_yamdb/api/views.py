@@ -3,7 +3,6 @@ from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, status, viewsets
 from rest_framework.decorators import action, api_view
-from rest_framework.exceptions import NotFound
 from rest_framework.mixins import (
     CreateModelMixin,
     DestroyModelMixin,
@@ -15,7 +14,6 @@ from rest_framework.permissions import (
     IsAuthenticatedOrReadOnly,
 )
 from rest_framework.response import Response
-from rest_framework_simplejwt.tokens import RefreshToken
 
 from .filters import TitleFilter
 from .permissions import (
@@ -172,14 +170,12 @@ class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.annotate(rating=Avg('reviews__score')).order_by(
         'name', '-year'
     )
-    serializer_class = TitleReadSerializer
-    pagination_class = PageNumberPagination
     filter_backends = (DjangoFilterBackend,)
     filterset_class = TitleFilter
     http_method_names = ('get', 'post', 'patch', 'delete')
     permission_classes = (IsAdminOrSuperUserReadOnly,)
 
     def get_serializer_class(self):
-        if self.action in ['create', 'partial_update']:
-            return TitleCreateSerializer
-        return TitleReadSerializer
+        if self.action in ['list', 'retrieve']:
+            return TitleReadSerializer
+        return TitleCreateSerializer
