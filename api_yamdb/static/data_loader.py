@@ -28,5 +28,5 @@ with sqlite3.connect('../db.sqlite3') as conn:
                 df.insert(len(df.columns), col_name, "")
         try:
             df.to_sql(table_name, conn, if_exists='append', index=False)
-        except sqlite3.IntegrityError as e:
+        except sqlite3.IntegrityError:
             continue
