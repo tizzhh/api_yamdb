@@ -197,7 +197,10 @@ python3 manage.py runserver
 - pytest-pythonpath==0.7.3
 - djangorestframework-simplejwt==4.7.2
 - django-filter==23.5
+<<<<<<< HEAD
 - pandas==2.2.1
+=======
+>>>>>>> master
 
 Версия Python:
 Python 3.9.18
