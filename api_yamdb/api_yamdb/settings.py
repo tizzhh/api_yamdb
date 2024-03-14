@@ -81,7 +81,7 @@ REST_FRAMEWORK = {
 }
 
 SIMPLE_JWT = {
-    "TOKEN_OBTAIN_SERIALIZER": "api.serializers.CustomTokenObtainPairSerializer",
+    "TOKEN_OBTAIN_SERIALIZER": "api.serializers.YamdbUserTokenObtainPairSerializer",
 }
 
 # Password validation
