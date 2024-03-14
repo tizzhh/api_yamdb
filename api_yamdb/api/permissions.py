@@ -1,26 +1,32 @@
 from rest_framework import permissions
 
-from custom_user.models import CustomUser
-
 
 class IsAdminOrSuperUser(permissions.BasePermission):
     def has_permission(self, request, view):
-        return request.user.is_superuser or (
-            request.user.is_authenticated
-            and request.user.role == CustomUser.Roles.admin
+        return request.user.is_authenticated and (
+            request.user.is_admin
+            or request.user.is_superuser
+            or request.user.is_staff
         )
 
 
-class IsAdminModerOrAuthorOrPostNew(permissions.IsAuthenticatedOrReadOnly):
+class IsAdminModerOrAuthor(permissions.IsAuthenticatedOrReadOnly):
     def has_object_permission(self, request, view, obj):
         return (
             request.method in permissions.SAFE_METHODS
             or request.user.is_authenticated
             and (
-                view.action == 'create'
-                or request.user.is_superuser
-                or request.user.role == CustomUser.Roles.admin
-                or request.user.role == CustomUser.Roles.moderator
+                request.user.is_superuser
+                or request.user.is_admin
+                or request.user.is_moderator
                 or request.user == obj.author
             )
+        )
+
+
+class IsAdminOrSuperUserReadOnly(IsAdminOrSuperUser):
+    def has_permission(self, request, view):
+        return (
+            request.method in permissions.SAFE_METHODS
+            or super().has_permission(request, view)
         )

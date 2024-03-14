@@ -1,59 +1,65 @@
-import datetime as dt
-
+from django.contrib.auth import get_user_model
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
-from django.db.models import CheckConstraint, Q
 
-from custom_user.models import CustomUser
+from . import constants
+from .validators import validate_year
+
+YamdbUser = get_user_model()
+
+
+class CategoryGenreAbstract(models.Model):
+    name = models.CharField(
+        'Наименование', max_length=constants.NAME_MAX_LENGTH
+    )
+    slug = models.SlugField(
+        'Слаг', unique=True, max_length=constants.SLUG_MAX_LENGTH
+    )
+
+    class Meta:
+        abstract = True
+        ordering = ('name',)
+
+    def __str__(self):
+        return self.name[: constants.OBJECT_NAME_DISPLAY_LENGTH]
 
 
 class Title(models.Model):
-    name = models.CharField('Наименование', max_length=256)
-    year = models.IntegerField('Год публикации')
-    description = models.TextField('Описание', null=True, blank=True)
+    name = models.CharField(
+        'Наименование', max_length=constants.NAME_MAX_LENGTH
+    )
+    year = models.PositiveSmallIntegerField(
+        'Год публикации', validators=[validate_year]
+    )
+    description = models.TextField('Описание', blank=True, default='')
     category = models.ForeignKey(
         'Category',
         on_delete=models.SET_NULL,
         verbose_name='Категория',
         null=True,
     )
-    genre = models.ManyToManyField('Genre', verbose_name='Жанры')
+    genre = models.ManyToManyField('Genre', verbose_name='Жанр')
 
     class Meta:
         default_related_name = 'titles'
-        ordering = ['name', 'year', 'category']
-
-        constraints = [
-            CheckConstraint(
-                check=Q(year__lte=dt.datetime.now().year),
-                name='Год выпуска не может быть больше текущего',
-            )
-        ]
+        verbose_name = 'Произведение'
+        verbose_name_plural = 'Произведения'
+        ordering = ('name',)
 
     def __str__(self):
-        return self.name
+        return self.name[: constants.OBJECT_NAME_DISPLAY_LENGTH]
 
 
-class Category(models.Model):
-    name = models.CharField('Наименование', max_length=256)
-    slug = models.SlugField('Слаг', unique=True, max_length=50)
-
-    class Meta:
-        ordering = ['name']
-
-    def __str__(self):
-        return self.name
+class Category(CategoryGenreAbstract):
+    class Meta(CategoryGenreAbstract.Meta):
+        verbose_name = 'Категория'
+        verbose_name_plural = 'Категории'
 
 
-class Genre(models.Model):
-    name = models.CharField('Наименование', max_length=256)
-    slug = models.SlugField('Слаг', unique=True, max_length=50)
-
-    class Meta:
-        ordering = ['name']
-
-    def __str__(self):
-        return self.name
+class Genre(CategoryGenreAbstract):
+    class Meta(CategoryGenreAbstract.Meta):
+        verbose_name = 'Жанр'
+        verbose_name_plural = 'Жанры'
 
 
 class Review(models.Model):
@@ -66,15 +72,18 @@ class Review(models.Model):
         verbose_name='Произведение',
     )
     author = models.ForeignKey(
-        CustomUser,
+        YamdbUser,
         on_delete=models.CASCADE,
         verbose_name='Пользователь',
     )
     score = models.PositiveSmallIntegerField(
-        default=1,
         validators=[
-            MinValueValidator(1, 'Оценка не может быть ниже 1.'),
-            MaxValueValidator(10, 'Оценка не может быть выше 10.'),
+            MinValueValidator(
+                constants.MIN_SCORE_VALUE, 'Оценка не может быть ниже 1.'
+            ),
+            MaxValueValidator(
+                constants.MAX_SCORE_VALUE, 'Оценка не может быть выше 10.'
+            ),
         ],
         verbose_name='Оценка',
     )
@@ -94,7 +103,7 @@ class Review(models.Model):
         ordering = ('-pub_date',)
 
     def __str__(self):
-        return self.text[:]
+        return self.text[: constants.OBJECT_NAME_DISPLAY_LENGTH]
 
 
 class Comment(models.Model):
@@ -102,7 +111,7 @@ class Comment(models.Model):
 
     text = models.TextField('Текст комментария')
     author = models.ForeignKey(
-        CustomUser, on_delete=models.CASCADE, verbose_name='Пользователь'
+        YamdbUser, on_delete=models.CASCADE, verbose_name='Пользователь'
     )
     pub_date = models.DateTimeField(
         auto_now_add=True, verbose_name='Дата публикации комментария'
@@ -118,4 +127,4 @@ class Comment(models.Model):
         ordering = ('-pub_date',)
 
     def __str__(self):
-        return self.text
+        return self.text[: constants.OBJECT_NAME_DISPLAY_LENGTH]

@@ -1,51 +1,84 @@
-from django import forms
-from django.core.exceptions import BadRequest
+from django.conf import settings
+from django.contrib.auth.tokens import default_token_generator
+from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from rest_framework_simplejwt.serializers import TokenObtainSerializer
+from rest_framework_simplejwt.tokens import RefreshToken
 
-from custom_user.models import CustomUser
-from reviews.models import Category, Comment, Genre, Review, Title
+from reviews.models import Category, Comment, Genre, Review, Title, YamdbUser
+from yamdb_user.models import (
+    EMAIL_MAX_LENGTH,
+    USERNAME_MAX_LENGTH,
+    BaseUserValidator,
+)
 
 
-class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
+class CustomTokenObtainPairSerializer(TokenObtainSerializer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         del self.fields['password']
         self.fields['username'] = serializers.CharField()
         self.fields['confirmation_code'] = serializers.CharField()
 
+    def get_token(cls, user):
+        return RefreshToken.for_user(user)
+
     def validate(self, attrs):
         username = attrs['username']
         confirmation_code = attrs['confirmation_code']
-        user = get_object_or_404(CustomUser, username=username)
-        if confirmation_code != user.confirmation_code:
-            raise BadRequest('Incorrect confirmation code')
+        user = get_object_or_404(YamdbUser, username=username)
+        if not default_token_generator.check_token(user, confirmation_code):
+            raise serializers.ValidationError('Incorrect confirmation code')
         attrs['USER'] = user
         return attrs
 
 
-class BaseUserSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = CustomUser
-        fields = (
-            'username',
-            'email',
+class UserSerializerAuth(serializers.Serializer, BaseUserValidator):
+    username = serializers.CharField(
+        max_length=USERNAME_MAX_LENGTH,
+    )
+    email = serializers.EmailField(max_length=EMAIL_MAX_LENGTH)
+
+    def validate(self, attrs):
+        username = attrs.get('username')
+        email = attrs.get('email')
+        errors = {}
+        email_exists = YamdbUser.objects.filter(email=email).exists()
+        username_exists = YamdbUser.objects.filter(username=username).exists()
+        if (
+            not email_exists and not username_exists
+        ) or YamdbUser.objects.filter(email=email, username=username).exists():
+            return attrs
+        if email_exists:
+            errors['email'] = 'Email already exists'
+        if username_exists:
+            errors['username'] = 'Username already exists'
+        raise serializers.ValidationError(errors)
+
+    def create(self, validated_data):
+        user = YamdbUser.objects.get_or_create(**validated_data)
+        confirmation_code = default_token_generator.make_token(user[0])
+        self.send_confirmation_code_email(validated_data, confirmation_code)
+
+        return user
+
+    def send_confirmation_code_email(self, data, confirmation_code):
+        send_mail(
+            subject='Confirmation code',
+            message=(
+                f'Dear {data.get("username")}, here\'s your confirmation'
+                f'code: {confirmation_code}'
+            ),
+            from_email=settings.YAMBD_EMAIL,
+            recipient_list=(data.get('email'),),
+            fail_silently=True,
         )
 
-    def validate_username(self, value):
-        if value == 'me':
-            raise forms.ValidationError('Username cannot be "me"')
-        return value
 
-
-class UserSerializerAuth(BaseUserSerializer):
-    ...
-
-
-class UserSerializerAdmin(BaseUserSerializer):
+class UserSerializerAdmin(serializers.ModelSerializer, BaseUserValidator):
     class Meta:
-        model = CustomUser
+        model = YamdbUser
         fields = (
             'username',
             'email',
@@ -56,17 +89,8 @@ class UserSerializerAdmin(BaseUserSerializer):
         )
 
 
-class UserSerializerReadPatch(BaseUserSerializer):
-    class Meta:
-        model = CustomUser
-        fields = (
-            'username',
-            'email',
-            'first_name',
-            'last_name',
-            'bio',
-            'role',
-        )
+class UserSerializerReadPatch(UserSerializerAdmin):
+    class Meta(UserSerializerAdmin.Meta):
         read_only_fields = ('role',)
 
 
@@ -84,26 +108,16 @@ class ReviewSerializer(serializers.ModelSerializer):
     def validate(self, data):
         """Checks user can create only one review for one title."""
         request = self.context['request']
-        title_id = self.context['view'].kwargs['title_id']
-        title = get_object_or_404(Title, pk=title_id)
-        if (
-            request.method == 'POST'
-            and Review.objects.filter(
-                author=request.user, title=title
-            ).exists()
-        ):
+        if request.method != 'POST':
+            return data
+        if Review.objects.filter(
+            author=request.user,
+            title__id=self.context['view'].kwargs['title_id'],
+        ).exists():
             raise serializers.ValidationError(
                 'Можно оставить только один отзыв к произведению.'
             )
         return data
-
-    def validate_score(self, value):
-        """Checks validity of rating value."""
-        if 1 > value > 10:
-            raise serializers.ValidationError(
-                'Допустимые значения оценки: от 1 до 10.'
-            )
-        return value
 
 
 class CommentSerializer(serializers.ModelSerializer):
@@ -130,10 +144,10 @@ class GenreSerializer(serializers.ModelSerializer):
         fields = ('name', 'slug')
 
 
-class TitleSerializer(serializers.ModelSerializer):
+class TitleReadSerializer(serializers.ModelSerializer):
     genre = GenreSerializer(many=True)
     category = CategorySerializer()
-    rating = serializers.IntegerField(read_only=True)
+    rating = serializers.IntegerField(read_only=True, default=0)
 
     class Meta:
         model = Title
@@ -150,7 +164,11 @@ class TitleSerializer(serializers.ModelSerializer):
 
 class TitleCreateSerializer(serializers.ModelSerializer):
     genre = serializers.SlugRelatedField(
-        slug_field='slug', queryset=Genre.objects.all(), many=True
+        slug_field='slug',
+        queryset=Genre.objects.all(),
+        many=True,
+        allow_null=False,
+        allow_empty=False,
     )
     category = serializers.SlugRelatedField(
         slug_field='slug', queryset=Category.objects.all()
@@ -159,3 +177,6 @@ class TitleCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Title
         fields = ('id', 'name', 'year', 'description', 'genre', 'category')
+
+    def to_representation(self, instance):
+        return TitleReadSerializer(instance).data

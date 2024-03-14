@@ -1,7 +1,6 @@
 from django.apps import AppConfig
 
 
-class ReviewsConfig(AppConfig):
+class YamdbUserConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
-    name = 'reviews'
-    verbose_name = 'Отзывы'
+    name = 'yamdb_user'

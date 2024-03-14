@@ -54,6 +54,12 @@ pip install -r requirements.txt
 python3 manage.py migrate
 ```
 
+Предусмотрена возможность загрузить заранее подготовленные данные для таблиц:
+```
+cd static
+python3.9 data_loader.py 
+```
+
 Запустить проект:
 
 ```
@@ -191,6 +197,10 @@ python3 manage.py runserver
 - pytest-pythonpath==0.7.3
 - djangorestframework-simplejwt==4.7.2
 - django-filter==23.5
+<<<<<<< HEAD
+- pandas==2.2.1
+=======
+>>>>>>> master
 
 Версия Python:
 Python 3.9.18
