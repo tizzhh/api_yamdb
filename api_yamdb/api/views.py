@@ -24,7 +24,6 @@ from .permissions import (
 from .serializers import (
     CategorySerializer,
     CommentSerializer,
-    CustomTokenObtainPairSerializer,
     GenreSerializer,
     ReviewSerializer,
     TitleCreateSerializer,
@@ -32,13 +31,14 @@ from .serializers import (
     UserSerializerAdmin,
     UserSerializerAuth,
     UserSerializerReadPatch,
+    YamdbUserTokenObtainPairSerializer,
 )
 from reviews.models import Category, Genre, Review, Title, YamdbUser
 
 
 @api_view(['POST'])
-def get_custom_token(request):
-    serializer = CustomTokenObtainPairSerializer(data=request.data)
+def get_yamdb_user_token(request):
+    serializer = YamdbUserTokenObtainPairSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
     refresh = serializer.get_token(serializer.validated_data['USER'])
     return Response(

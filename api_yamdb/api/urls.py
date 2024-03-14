@@ -27,6 +27,6 @@ urlpatterns = [
         views.user_view_set_auth,
         name='signup',
     ),
-    path('v1/auth/token/', views.get_custom_token, name='jwt-token'),
+    path('v1/auth/token/', views.get_yamdb_user_token, name='jwt-token'),
     path('v1/', include(api_v1_router.urls)),
 ]

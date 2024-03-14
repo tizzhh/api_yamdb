@@ -14,7 +14,7 @@ from yamdb_user.models import (
 )
 
 
-class CustomTokenObtainPairSerializer(TokenObtainSerializer):
+class YamdbUserTokenObtainPairSerializer(TokenObtainSerializer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         del self.fields['password']
