@@ -11,7 +11,7 @@ class BaseUserValidator:
             raise ValidationError(
                 'Prohibited username symbols: "'
                 + ', '.join(
-                    f"{banned_symbol}" for banned_symbol in banned_symbols
+                    f'{banned_symbol}' for banned_symbol in banned_symbols
                 )
                 + '"'
             )
