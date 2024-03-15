@@ -12,9 +12,6 @@ TABLE_DATA = {
     'data/users.csv': 'yamdb_user_yamdbuser',
 }
 
-# не нашел и не придумал, как нормально импортировать
-# с учетом того, что названия столбцов не совпадают,
-# поэтому переименовал.
 with sqlite3.connect('../db.sqlite3') as conn:
     for csv_path, table_name in TABLE_DATA.items():
         df = pd.read_csv(csv_path)

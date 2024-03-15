@@ -1,28 +1,13 @@
 from django.contrib import admin
+from django.contrib.auth.models import Group
 
 from .constants import OBJECT_PER_ADMIN_PAGE
-from .models import Category, Comment, Genre, Review, Title, YamdbUser
+from .models import Category, Comment, Genre, Review, Title
 
 admin.site.empty_value_display = 'нет данных'
 admin.site.site_title = 'Админ-зона проекта YAMDB'
 admin.site.site_header = 'Админ-зона проекта YAMDB'
-
-
-@admin.register(YamdbUser)
-class UserAdmin(admin.ModelAdmin):
-    list_display = (
-        'id',
-        'username',
-        'email',
-        'first_name',
-        'last_name',
-        'bio',
-        'role',
-    )
-    list_display_links = ('username',)
-    list_filter = ('username',)
-    list_per_page = OBJECT_PER_ADMIN_PAGE
-    search_fields = ('username', 'role')
+admin.site.unregister(Group)
 
 
 @admin.register(Category)
