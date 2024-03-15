@@ -44,9 +44,6 @@ class UserSerializerAuth(serializers.Serializer, BaseUserValidator):
         errors = {}
         email_exists = YamdbUser.objects.filter(email=email).first()
         username_exists = YamdbUser.objects.filter(username=username).first()
-        # if (
-        #     not email_exists and not username_exists
-        # ) or YamdbUser.objects.filter(email=email, username=username).exists():
         if email_exists == username_exists:
             return attrs
         if email_exists:
