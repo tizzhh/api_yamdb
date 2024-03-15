@@ -187,23 +187,18 @@ python manage.py runserver
 }
 ```
 
-Используемые библиотеки:
-- requests==2.26.0
-- Django==3.2
-- djangorestframework==3.12.4
-- PyJWT==2.1.0
-- pytest==6.2.4
-- pytest-django==4.4.0
-- pytest-pythonpath==0.7.3
-- djangorestframework-simplejwt==4.7.2
-- django-filter==23.5
-<<<<<<< HEAD
-- pandas==2.2.1
-=======
->>>>>>> master
-
-Версия Python:
-Python 3.9.18
+Стек технологий:
+- Python 3.9.18
+- requests 2.26
+- Django 3.2
+- djangorestframework 3.12.4
+- PyJWT
+- pytest
+- pytest-django
+- pytest-pythonpath
+- djangorestframework-simplejwt
+- django-filter
+- pandas
 
 Авторы:
 
