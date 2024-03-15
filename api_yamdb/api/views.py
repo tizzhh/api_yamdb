@@ -3,12 +3,6 @@ from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, status, viewsets
 from rest_framework.decorators import action, api_view
-from rest_framework.mixins import (
-    CreateModelMixin,
-    DestroyModelMixin,
-    ListModelMixin,
-)
-from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import (
     IsAuthenticated,
     IsAuthenticatedOrReadOnly,
@@ -33,6 +27,7 @@ from .serializers import (
     UserSerializerReadPatch,
     YamdbUserTokenObtainPairSerializer,
 )
+from api.base_views import CategoryGenreBaseViewSet
 from reviews.models import Category, Genre, Review, Title, YamdbUser
 
 
@@ -133,19 +128,6 @@ class CommentViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         return self.get_review().comments.all()
-
-
-class CategoryGenreBaseViewSet(
-    ListModelMixin,
-    CreateModelMixin,
-    DestroyModelMixin,
-    viewsets.GenericViewSet,
-):
-    permission_classes = (IsAdminOrSuperUserReadOnly,)
-    pagination_class = PageNumberPagination
-    filter_backends = (filters.SearchFilter,)
-    search_fields = ('=name',)
-    lookup_field = 'slug'
 
 
 class GenreViewSet(CategoryGenreBaseViewSet):
