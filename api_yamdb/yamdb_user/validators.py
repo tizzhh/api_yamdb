@@ -9,10 +9,8 @@ class BaseUserValidator:
             raise ValidationError('Username cannot be "me"')
         if banned_symbols := re.sub(r'[\w.@+-]+', '', value):
             raise ValidationError(
-                'Prohibited username symbols: "'
-                + ', '.join(
-                    f'{banned_symbol}' for banned_symbol in banned_symbols
-                )
-                + '"'
+                'Prohibited username symbols: "{'
+                + '}, {'.join(banned_symbols)
+                + '}"'
             )
         return value

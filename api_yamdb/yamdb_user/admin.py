@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 
 from reviews.constants import OBJECT_PER_ADMIN_PAGE
-from yamdb_user.models import YamdbUser
+from reviews.models import YamdbUser
 
 admin.site.empty_value_display = 'нет данных'
 admin.site.site_title = 'Админ-зона проекта YAMDB'

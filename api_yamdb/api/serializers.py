@@ -18,7 +18,7 @@ class YamdbUserTokenObtainPairSerializer(TokenObtainSerializer):
         self.fields['username'] = serializers.CharField()
         self.fields['confirmation_code'] = serializers.CharField()
 
-    # у TokenObtainSerializer он NotImplementedError
+    @classmethod
     def get_token(cls, user):
         return AccessToken.for_user(user)
 
@@ -42,13 +42,13 @@ class UserSerializerAuth(serializers.Serializer, BaseUserValidator):
         username = attrs.get('username')
         email = attrs.get('email')
         errors = {}
-        email_exists = YamdbUser.objects.filter(email=email).first()
-        username_exists = YamdbUser.objects.filter(username=username).first()
-        if email_exists == username_exists:
+        email = YamdbUser.objects.filter(email=email).first()
+        username = YamdbUser.objects.filter(username=username).first()
+        if email == username:
             return attrs
-        if email_exists:
+        if email:
             errors['email'] = 'Email already exists'
-        if username_exists:
+        if username:
             errors['username'] = 'Username already exists'
         raise serializers.ValidationError(errors)
 
