@@ -28,10 +28,10 @@ class Title(models.Model):
     name = models.CharField(
         'Наименование', max_length=constants.NAME_MAX_LENGTH
     )
-    year = models.PositiveSmallIntegerField(
+    year = models.SmallIntegerField(
         'Год публикации', validators=[validate_year]
     )
-    description = models.TextField('Описание', blank=True, default='')
+    description = models.TextField('Описание', blank=True)
     category = models.ForeignKey(
         'Category',
         on_delete=models.SET_NULL,
