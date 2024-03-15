@@ -1,24 +1,11 @@
-import re
-
 from django.contrib.auth.models import AbstractUser
-from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import CheckConstraint, Q
 
+from yamdb_user.validators import BaseUserValidator
+
 USERNAME_MAX_LENGTH = 150
 EMAIL_MAX_LENGTH = 254
-
-
-# переместил сюда из-за циклического импорта
-class BaseUserValidator:
-    def validate_username(self, value):
-        if value == 'me':
-            raise ValidationError('Username cannot be "me"')
-        if banned_symbols := re.sub(r'[\w.@+-]+', '', value):
-            raise ValidationError(
-                f'Prohibited username symbols: \'{banned_symbols}\''
-            )
-        return value
 
 
 class YamdbUser(AbstractUser, BaseUserValidator):
@@ -40,7 +27,9 @@ class YamdbUser(AbstractUser, BaseUserValidator):
 
     @property
     def is_admin(self):
-        return self.role == self.Roles.ADMIN
+        return (
+            self.is_superuser or self.is_staff or self.role == self.Roles.ADMIN
+        )
 
     @property
     def is_moderator(self):
