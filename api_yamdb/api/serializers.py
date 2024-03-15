@@ -4,14 +4,11 @@ from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainSerializer
-from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.tokens import AccessToken
 
 from reviews.models import Category, Comment, Genre, Review, Title, YamdbUser
-from yamdb_user.models import (
-    EMAIL_MAX_LENGTH,
-    USERNAME_MAX_LENGTH,
-    BaseUserValidator,
-)
+from yamdb_user.models import EMAIL_MAX_LENGTH, USERNAME_MAX_LENGTH
+from yamdb_user.validators import BaseUserValidator
 
 
 class YamdbUserTokenObtainPairSerializer(TokenObtainSerializer):
@@ -21,8 +18,9 @@ class YamdbUserTokenObtainPairSerializer(TokenObtainSerializer):
         self.fields['username'] = serializers.CharField()
         self.fields['confirmation_code'] = serializers.CharField()
 
+    # у TokenObtainSerializer он NotImplementedError
     def get_token(cls, user):
-        return RefreshToken.for_user(user)
+        return AccessToken.for_user(user)
 
     def validate(self, attrs):
         username = attrs['username']
@@ -44,11 +42,9 @@ class UserSerializerAuth(serializers.Serializer, BaseUserValidator):
         username = attrs.get('username')
         email = attrs.get('email')
         errors = {}
-        email_exists = YamdbUser.objects.filter(email=email).exists()
-        username_exists = YamdbUser.objects.filter(username=username).exists()
-        if (
-            not email_exists and not username_exists
-        ) or YamdbUser.objects.filter(email=email, username=username).exists():
+        email_exists = YamdbUser.objects.filter(email=email).first()
+        username_exists = YamdbUser.objects.filter(username=username).first()
+        if email_exists == username_exists:
             return attrs
         if email_exists:
             errors['email'] = 'Email already exists'

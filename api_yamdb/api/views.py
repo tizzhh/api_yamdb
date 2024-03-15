@@ -40,10 +40,10 @@ from reviews.models import Category, Genre, Review, Title, YamdbUser
 def get_yamdb_user_token(request):
     serializer = YamdbUserTokenObtainPairSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
-    refresh = serializer.get_token(serializer.validated_data['USER'])
+    access_token = serializer.get_token(serializer.validated_data['USER'])
     return Response(
         {
-            'token': str(refresh.access_token),
+            'token': str(access_token),
         },
         status=status.HTTP_200_OK,
     )
@@ -89,14 +89,6 @@ class UserViewSetAdmin(viewsets.ModelViewSet):
         if request.method == 'PATCH':
             serializer.save()
         return Response(serializer.data)
-
-
-class UserViewSetReadPatch(viewsets.ModelViewSet):
-    serializer_class = UserSerializerReadPatch
-    permission_classes = (IsAuthenticated,)
-
-    def get_object(self):
-        return get_object_or_404(YamdbUser, username=self.request.user)
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
