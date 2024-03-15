@@ -12,13 +12,15 @@ from yamdb_user.validators import BaseUserValidator
 
 
 class CustomTokenObtainPairSerializer(TokenObtainSerializer):
-    token_class = AccessToken
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         del self.fields['password']
         self.fields['username'] = serializers.CharField()
         self.fields['confirmation_code'] = serializers.CharField()
+
+    # у TokenObtainSerializer он NotImplementedError
+    def get_token(cls, user):
+        return AccessToken.for_user(user)
 
     def validate(self, attrs):
         username = attrs['username']

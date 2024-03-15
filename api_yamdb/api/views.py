@@ -40,10 +40,10 @@ from reviews.models import Category, Genre, Review, Title, YamdbUser
 def get_custom_token(request):
     serializer = CustomTokenObtainPairSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
-    access = serializer.get_token(serializer.validated_data['USER'])
+    access_token = serializer.get_token(serializer.validated_data['USER'])
     return Response(
         {
-            'token': str(access.access_token),
+            'token': str(access_token),
         },
         status=status.HTTP_200_OK,
     )
